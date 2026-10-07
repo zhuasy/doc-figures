@@ -1,0 +1,59 @@
+[
+  {
+    "name": "timeline-trip",
+    "template": "timeline",
+    "title": "One document's trip through a run",
+    "subtitle": "Illustrative. The first extract try failed, waited 18 s, and the second try succeeded.",
+    "unit": "s",
+    "axisLabel": "seconds since the row was admitted",
+    "rows": [
+      {"label": "Row · invoice.pdf", "start": 0, "end": 151, "color": "slate"},
+      {"label": "Attempt · Source", "start": 0.5, "end": 2.4, "depth": 1},
+      {"label": "Attempt · Extract, try 1", "start": 2.6, "end": 42.8, "depth": 1, "failed": true, "note": "timed out"},
+      {"label": "waiting to retry", "start": 42.8, "end": 60.8, "depth": 1, "wait": true},
+      {"label": "Attempt · Extract, try 2", "start": 60.8, "end": 134.6, "depth": 1, "focus": true, "note": "succeeded"},
+      {"label": "Attempt · Formula", "start": 134.6, "end": 137.3, "depth": 1},
+      {"label": "Attempt · Export", "start": 137.3, "end": 151, "depth": 1}
+    ]
+  },
+  {
+    "name": "timeline-zoom",
+    "template": "timeline",
+    "title": "Inside one attempt, then inside one job",
+    "subtitle": "Illustrative. Panel 2 opens up the orange job from panel 1.",
+    "panels": [
+      {
+        "title": "1  One attempt",
+        "subtitle": "Our jobs, the waits between them, and the OCR service's reply",
+        "unit": "s",
+        "axisLabel": "seconds since the attempt was queued",
+        "rows": [
+          {"label": "Attempt · Extract (parse)", "start": 0, "end": 40.25, "color": "blue"},
+          {"label": "waiting in the queue", "start": 0, "end": 0.9, "depth": 1, "wait": true},
+          {"label": "job step.execute", "start": 0.9, "end": 1.352, "depth": 1, "color": "teal", "focus": true, "note": "claim it, send it to OCR"},
+          {"label": "waiting on OCR", "start": 1.352, "end": 39.35, "depth": 1, "wait": "external"},
+          {"label": "http webhook from OCR", "start": 39.35, "end": 39.369, "depth": 1, "color": "amber"},
+          {"label": "waiting in the queue", "start": 39.369, "end": 40.05, "depth": 1, "wait": true},
+          {"label": "job attempt.settle", "start": 40.05, "end": 40.25, "depth": 1, "color": "teal", "note": "fetch the result, save it"}
+        ]
+      },
+      {
+        "title": "2  One job: where its 452 ms went",
+        "subtitle": "Four totals on the job, stacked. They add up to 452 ms.",
+        "unit": "ms",
+        "axisLabel": "milliseconds since the job started",
+        "rows": [
+          {"label": "job step.execute", "start": 0, "end": 452, "color": "teal"},
+          {"label": "where the time went", "start": 0, "end": 452, "depth": 1, "duration": false,
+           "note": "connection 5 · database 35 · HTTP 310 · code 102",
+           "parts": [
+             {"start": 0, "end": 5, "wait": true, "label": "waiting for a database connection"},
+             {"start": 5, "end": 40, "color": "sky", "label": "database (4 queries)"},
+             {"start": 40, "end": 350, "color": "amber", "label": "HTTP call to OCR"},
+             {"start": 350, "end": 452, "color": "stone", "label": "our code"}
+           ]}
+        ]
+      }
+    ]
+  }
+]

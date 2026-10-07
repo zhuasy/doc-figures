@@ -1,0 +1,12 @@
+{
+  "template": "stack",
+  "title": "Four PRs that add per-document progress",
+  "subtitle": "Illustrative. Each layer builds on the one below it.",
+  "base": "main",
+  "prs": [
+    {"number": 101, "title": "Add the run items table", "adds": "Stores one row per document in a run, with its status", "status": "merged"},
+    {"number": 102, "title": "Engine writes item progress", "adds": "The engine records each document's status as it moves through a run", "status": "open", "needs": "the run items table from #101"},
+    {"number": 103, "title": "Show progress on the runs page", "adds": "A live progress bar for every document, synced from the new table", "status": "open", "this": true, "needs": "the per-document status that #102 writes"},
+    {"number": 104, "title": "Retry failed documents from the page", "adds": "A retry button that queues only the documents that failed", "status": "draft", "needs": "the progress view from #103 to show which documents failed"}
+  ]
+}

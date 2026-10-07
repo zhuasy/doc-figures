@@ -1,0 +1,108 @@
+[
+  {
+    "template": "compare",
+    "name": "compare-upload-retry",
+    "title": "Retries send only the parts that are missing",
+    "subtitle": "Illustrative: a 5-part upload drops after part 3, then retries.",
+    "before": {
+      "caption": "The retry starts over and sends every part again.",
+      "blocks": [
+        {"type": "chips", "label": "Stored after the first try", "items": [
+          {"text": "1", "state": "done"}, {"text": "2", "state": "done"}, {"text": "3", "state": "done"},
+          {"text": "4", "state": "muted"}, {"text": "5", "state": "muted"}]},
+        {"type": "chips", "label": "Sent on retry", "items": [
+          {"text": "1"}, {"text": "2"}, {"text": "3"}, {"text": "4"}, {"text": "5"}]},
+        {"type": "rows", "items": [{"text": "5 parts sent; 3 of them twice", "status": "fail"}]}
+      ]
+    },
+    "after": {
+      "caption": "The API asks storage what arrived and sends only the rest.",
+      "blocks": [
+        {"type": "chips", "label": "Stored after the first try", "items": [
+          {"text": "1", "state": "done"}, {"text": "2", "state": "done"}, {"text": "3", "state": "done"},
+          {"text": "4", "state": "muted"}, {"text": "5", "state": "muted"}]},
+        {"type": "chips", "label": "Sent on retry", "items": [
+          {"text": "1", "state": "skipped"}, {"text": "2", "state": "skipped"}, {"text": "3", "state": "skipped"},
+          {"text": "4"}, {"text": "5"}]},
+        {"type": "rows", "items": [{"text": "2 parts sent; nothing twice", "status": "ok"}]}
+      ]
+    }
+  },
+  {
+    "template": "compare",
+    "name": "compare-cache",
+    "title": "Table reads go through a cache",
+    "subtitle": "Illustrative. The new cache answers repeat reads without touching Postgres.",
+    "before": {
+      "caption": "Every page of a table is a database query.",
+      "blocks": [
+        {"type": "flow", "nodes": [
+          {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Pages through a table"},
+          {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access"},
+          {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Runs every query"}
+        ], "edges": [
+          {"from": "web", "to": "api", "label": "next page"},
+          {"from": "api", "to": "db", "label": "query"}
+        ]},
+        {"type": "rows", "items": [{"text": "Busy tables slow down everyone", "status": "fail"}]}
+      ]
+    },
+    "after": {
+      "caption": "Repeat reads come from the cache; Postgres sees only misses.",
+      "blocks": [
+        {"type": "flow", "nodes": [
+          {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Pages through a table"},
+          {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access"},
+          {"id": "cache", "label": "Cache", "icon": "zap", "color": "teal", "does": "Keeps recent pages for 60 s", "tag": "new"},
+          {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Runs cache misses only"}
+        ], "edges": [
+          {"from": "web", "to": "api", "label": "next page"},
+          {"from": "api", "to": "cache", "label": "look up", "changed": true},
+          {"from": "cache", "to": "db", "label": "only on a miss", "changed": true}
+        ]},
+        {"type": "rows", "items": [{"text": "Most reads skip the database", "status": "ok"}]}
+      ]
+    }
+  },
+  {
+    "template": "compare",
+    "name": "compare-webhook",
+    "title": "Results arrive by webhook instead of polling",
+    "subtitle": "Illustrative. The OCR service now calls us when a document is done.",
+    "layout": "stacked",
+    "before": {
+      "caption": "The engine asks the OCR service every 5 seconds until the result is ready.",
+      "blocks": [
+        {"type": "flow", "nodes": [
+          {"id": "engine", "label": "Engine", "icon": "cpu", "color": "teal", "does": "Runs each step"},
+          {"id": "ocr", "label": "OCR service", "icon": "file-scan", "does": "Reads the document", "external": true}
+        ], "edges": [
+          {"from": "engine", "to": "ocr", "label": "done yet? every 5\u00a0s"},
+          {"from": "ocr", "to": "engine", "label": "not yet", "later": true}
+        ]},
+        {"type": "rows", "items": [
+          {"text": "About 12 status calls per document", "status": "fail"},
+          {"text": "A worker stays busy while it waits", "status": "fail"}
+        ]}
+      ]
+    },
+    "after": {
+      "caption": "The OCR service calls a webhook once, and the waiting step wakes up.",
+      "blocks": [
+        {"type": "flow", "nodeWidth": 160, "nodes": [
+          {"id": "engine", "label": "Engine", "icon": "cpu", "color": "teal", "does": "Runs each step"},
+          {"id": "ocr", "label": "OCR service", "icon": "file-scan", "does": "Reads the document", "external": true},
+          {"id": "hook", "label": "Webhook", "icon": "webhook", "color": "violet", "does": "Wakes the waiting step", "tag": "new"}
+        ], "edges": [
+          {"from": "engine", "to": "ocr", "label": "send it"},
+          {"from": "ocr", "to": "hook", "label": "when done", "later": true, "changed": true},
+          {"from": "hook", "to": "engine", "label": "resume"}
+        ]},
+        {"type": "rows", "items": [
+          {"text": "1 call per document", "status": "ok"},
+          {"text": "Workers are free while the OCR service reads", "status": "ok"}
+        ]}
+      ]
+    }
+  }
+]

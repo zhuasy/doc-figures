@@ -1,0 +1,27 @@
+{
+  "template": "flow",
+  "title": "How a document run moves through the system",
+  "subtitle": "Illustrative. Orange marks the part a PR would change; numbers give the order.",
+  "nodes": [
+    {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Shows runs live and pages through big tables"},
+    {"id": "backend", "label": "Our backend", "children": [
+      {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access and saves new runs"},
+      {"id": "queue", "label": "Job queue", "icon": "list-ordered", "color": "teal", "does": "Holds steps until a worker is free"},
+      {"id": "engine", "label": "Engine", "icon": "cpu", "color": "teal", "does": "Runs each step and retries what failed", "changed": true},
+      {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Source of truth for runs, rows and steps"},
+      {"id": "electric", "label": "Electric", "icon": "radio-tower", "color": "sky", "does": "Streams database changes to open browsers"}
+    ]},
+    {"id": "ocr", "label": "OCR service", "icon": "file-scan", "color": "amber", "does": "Reads documents and extracts fields", "external": true}
+  ],
+  "edges": [
+    {"from": "web", "to": "api", "label": "start a run"},
+    {"from": "api", "to": "db", "label": "save the run"},
+    {"from": "api", "to": "queue", "label": "queue the first step"},
+    {"from": "queue", "to": "engine", "label": "hand out a step"},
+    {"from": "engine", "to": "ocr", "label": "send the document"},
+    {"from": "ocr", "to": "engine", "label": "result is ready", "later": true},
+    {"from": "engine", "to": "db", "label": "save the results"},
+    {"from": "db", "to": "electric", "label": "change feed"},
+    {"from": "electric", "to": "web", "label": "live update"}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "template": "flow",
+  "title": "Retries resume where the upload stopped",
+  "subtitle": "Illustrative. The API now asks storage which parts already arrived.",
+  "nodes": [
+    {"id": "browser", "label": "Browser", "icon": "monitor", "color": "blue", "does": "Splits the file into 5 parts"},
+    {"id": "api", "label": "Upload API", "icon": "server", "color": "violet", "does": "Asks storage which parts it already has", "changed": true},
+    {"id": "gcs", "label": "Cloud storage", "icon": "cloud", "color": "sky", "does": "Keeps parts 1–3 from the first try", "external": true}
+  ],
+  "edges": [
+    {"from": "browser", "to": "api", "label": "retry the upload"},
+    {"from": "api", "to": "gcs", "label": "list stored parts", "changed": true},
+    {"from": "gcs", "to": "api", "label": "parts 1–3", "later": true}
+  ]
+}

@@ -1,0 +1,4 @@
+out/
+figs/
+__pycache__/
+.DS_Store

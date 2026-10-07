@@ -1,0 +1,21 @@
+{
+  "template": "sequence",
+  "title": "How a parse result comes back to the engine",
+  "subtitle": "Illustrative. The engine never waits on the OCR service; the orange step is the one a PR would change.",
+  "actors": [
+    {"id": "engine", "label": "Engine", "icon": "cpu", "color": "teal", "does": "Runs each step"},
+    {"id": "ocr", "label": "OCR service", "icon": "file-scan", "color": "amber", "does": "Reads documents", "external": true},
+    {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Receives webhooks"},
+    {"id": "queue", "label": "Job queue", "icon": "list-ordered", "color": "teal", "does": "Holds steps for workers"},
+    {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Source of truth"}
+  ],
+  "messages": [
+    {"from": "engine", "to": "ocr", "label": "submit document"},
+    {"gap": "38 s later"},
+    {"from": "ocr", "to": "api", "label": "webhook: done", "later": true},
+    {"note": "The webhook only queues work, so a slow step never blocks it.", "over": ["api", "queue"]},
+    {"from": "api", "to": "queue", "label": "queue settle"},
+    {"from": "queue", "to": "engine", "label": "settle step"},
+    {"from": "engine", "to": "db", "label": "save result", "changed": true}
+  ]
+}

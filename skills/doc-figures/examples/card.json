@@ -1,0 +1,52 @@
+[
+  {
+    "name": "card-span",
+    "template": "card",
+    "title": "A job span gains two fields",
+    "subtitle": "Illustrative values. Green rows are new; the orange row changed.",
+    "cards": [
+      {
+        "id": "span", "title": "job step.execute", "subtitle": "One span per job, inside the row's trace",
+        "icon": "activity", "color": "teal",
+        "fields": [
+          {"name": "trace_id", "value": "4bf92f35 77b34da6", "note": "Shared by every span in the row's trace"},
+          {"name": "span_id", "value": "00f067aa 0ba902b7"},
+          {"name": "name", "value": "step.execute"},
+          {"name": "duration_ms", "value": 452},
+          {"name": "attempt_id", "value": "att_7Q2", "tag": "new", "note": "Links the span to the Attempt it ran for"},
+          {"name": "db_ms", "value": "35 (4 queries)", "tag": "new", "note": "Time spent waiting on Postgres"},
+          {"name": "status", "value": "ok", "tag": "changed", "note": "Was \"completed\"; now uses the OpenTelemetry word"}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "card-tables",
+    "template": "card",
+    "title": "Each run item points at its run",
+    "subtitle": "Illustrative subset of columns. The arrow is a foreign key.",
+    "cards": [
+      {
+        "id": "runs", "title": "runs", "subtitle": "One row per Run", "icon": "database", "color": "slate",
+        "fields": [
+          {"name": "id", "value": "uuid", "note": "Primary key"},
+          {"name": "org_id", "value": "text"},
+          {"name": "pipeline_id", "value": "uuid", "note": "The pipeline this Run executes"},
+          {"name": "started_by", "value": "text"},
+          {"name": "created_at", "value": "timestamptz"}
+        ]
+      },
+      {
+        "id": "items", "title": "run_items", "subtitle": "One row per record in a Run", "icon": "table", "color": "blue",
+        "fields": [
+          {"name": "id", "value": "uuid", "note": "Primary key"},
+          {"name": "run_id", "value": "uuid", "note": "The Run this item belongs to"},
+          {"name": "record_id", "value": "uuid", "note": "The record it processes"},
+          {"name": "ordinal", "value": "bigint"},
+          {"name": "status", "value": "text"}
+        ]
+      }
+    ],
+    "links": [{"from": "items.run_id", "to": "runs.id", "label": "foreign key"}]
+  }
+]
