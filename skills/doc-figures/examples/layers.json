@@ -1,0 +1,35 @@
+{
+  "template": "layers",
+  "name": "layers",
+  "title": "Each layer works in both directions with the next",
+  "subtitle": "Illustrative. The orange ring marks the team that owns this design.",
+  "layers": [
+    {"label": "User interfaces",
+     "boxes": [
+       {"label": "Web app", "icon": "message-square", "color": "blue", "does": "Start jobs, follow them live"},
+       {"label": "Review queue", "icon": "eye", "color": "pink", "does": "Check outputs against their sources"}
+     ],
+     "down": "reviews, corrections, new jobs", "up": "outputs with sources"},
+    {"label": "Products",
+     "boxes": [
+       {"label": "Document assistants", "icon": "file-text", "color": "teal",
+        "items": ["Invoices", "Claims", "Contracts", "Reports"]},
+       {"label": "Quality loop", "icon": "refresh-cw", "color": "violet",
+        "items": ["Evals", "Feedback", "Traces"]}
+     ],
+     "down": "run saved assistants", "up": "outputs, traces"},
+    {"label": "Platforms",
+     "boxes": [
+       {"label": "Agent platform", "icon": "bot", "color": "orange", "us": true, "tag": "Our team",
+        "does": "Runs agents for every product", "items": ["Agents", "Harness", "Runtime"], "right": "run a workflow"},
+       {"label": "Workflow platform", "icon": "workflow", "color": "sky", "does": "Pipelines as code",
+        "items": ["APIs", "Runtime"], "left": "agent step"}
+     ],
+     "down": "OCR, model calls", "up": "results"},
+    {"label": "Core capabilities",
+     "boxes": [
+       {"label": "OCR service", "icon": "file-scan", "color": "slate", "does": "Read, extract, split"},
+       {"label": "Models", "icon": "sparkles", "color": "stone", "does": "In-house and hosted models"}
+     ]}
+  ]
+}

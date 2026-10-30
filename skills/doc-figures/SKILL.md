@@ -20,6 +20,7 @@ Write the takeaway in one sentence, then pick the template. Read only that templ
 | `sequence` | Who calls whom, in order, with waits and replies that arrive later | `references/sequence.md` |
 | `card` | The fields of a record, payload or table, and links between them | `references/card.md` |
 | `timeline` | Where time went: waterfalls, retries, waits, zooming into one part | `references/timeline.md` |
+| `layers` | A layered architecture where each layer works both ways with the next; ring one box | `references/layers.md` |
 
 A chart of measured data series (bars, lines, distributions) is not a template: see `references/charts.md`.
 

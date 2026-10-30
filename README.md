@@ -23,6 +23,7 @@ Needs Node 22+ and Google Chrome or Chromium (set `CHROME_PATH` if it lives some
 | `sequence` | Who calls whom, in order, including replies that arrive later |
 | `card` | The fields of a record or table, and links between them |
 | `timeline` | Where time went: waterfalls, retries, waits |
+| `layers` | A layered architecture where each layer works both ways with the next |
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/flow-small.dark.png">
