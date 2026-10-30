@@ -17,7 +17,7 @@ Panel `title` defaults to "Before" and "After". `accent: false` drops the orange
 | --- | --- | --- |
 | `flow` | `nodes`, `edges`, `direction?`, `nodeWidth?`, `numbered?` | A mini flow; same node and edge fields as `flow` |
 | `rows` | `items: [{text, icon?, status?}]` | Outcomes; `status`: ok, fail, changed, new, removed, muted |
-| `chips` | `label?`, `items: [{text, state?}]` | Countable things such as parts or pages; `state`: sent (default), done, skipped, fail, new, muted |
+| `chips` | `label?`, `items: [{text, state?}]` | Countable things such as parts or pages; `state`: sent (default), done, skipped, fail, new, muted. A plain string is a chip with the default state |
 | `text` | `text` | One short sentence |
 
 ```json
@@ -26,7 +26,7 @@ Panel `title` defaults to "Before" and "After". `accent: false` drops the orange
   "title": "Retries send only the parts that are missing",
   "subtitle": "Illustrative: a 5-part upload drops after part 3, then retries.",
   "before": {"caption": "The retry sends every part again.", "blocks": [
-    {"type": "chips", "label": "Sent on retry", "items": [{"text": "1"}, {"text": "2"}, {"text": "3"}, {"text": "4"}, {"text": "5"}]},
+    {"type": "chips", "label": "Sent on retry", "items": ["1", "2", "3", "4", "5"]},
     {"type": "rows", "items": [{"text": "3 parts sent twice", "status": "fail"}]}
   ]},
   "after": {"caption": "The API sends only what storage lacks.", "blocks": [

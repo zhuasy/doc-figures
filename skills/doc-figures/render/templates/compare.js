@@ -56,6 +56,8 @@ TEMPLATES.compare = async (spec, DF) => {
   const mark = (s) => `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${MARKS[s] || MARKS.muted}</svg>`;
   const ARROW = '<span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M8.5 3.5L13 8l-4.5 4.5"/></svg></span>';
 
+  const chip = (it) => (typeof it === "object" ? it : {text: it});
+
   const blocks = {
     rows(b) {
       const list = DF.el("div", "cmp-rows");
@@ -73,7 +75,7 @@ TEMPLATES.compare = async (spec, DF) => {
       const wrap = DF.el("div");
       if (b.label) wrap.appendChild(DF.el("div", "cmp-label chk", b.label));
       const row = DF.el("div", "cmp-chips");
-      for (const it of b.items || []) row.appendChild(DF.el("span", `cmp-chip chk ${it.state || "sent"}`, String(it.text)));
+      for (const it of (b.items || []).map(chip)) row.appendChild(DF.el("span", `cmp-chip chk ${it.state || "sent"}`, String(it.text)));
       wrap.appendChild(row);
       return wrap;
     },
@@ -138,7 +140,7 @@ TEMPLATES.compare = async (spec, DF) => {
   function chipKey() {
     if (spec.chipKey === false) return;
     const states = [...new Set([spec.before, spec.after].flatMap((p) => (p?.blocks || []).filter((b) => b.type === "chips")
-      .flatMap((b) => (b.items || []).map((it) => it.state || "sent"))))];
+      .flatMap((b) => (b.items || []).map((it) => chip(it).state || "sent"))))];
     if (states.length < 2) return;
     const words = {...KEY, ...(spec.chipKey || {})};
     const key = DF.el("div", "cmp-key chk");
