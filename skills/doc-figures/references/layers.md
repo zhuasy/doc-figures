@@ -23,10 +23,12 @@ the center: every box keeps its own color.
 | Field | On | Meaning |
 | --- | --- | --- |
 | `label`, `boxes` | layer | Heading of the band and its boxes, left to right |
-| `down`, `up` | layer | Labels of the two arrows to the next layer down; either may be left out |
+| `down`, `up` | layer | Labels of one two-headed arrow to the next layer, in one pill at the center; either may be left out |
+| `links` | layer | Instead of `down`/`up`: a list of `{at, down, up, shift}`, each over the box or part whose `id` is `at` |
 | `label`, `icon`, `color`, `does`, `items` | box | Name, icon, top-bar color, one line, small chips |
 | `us`, `tag` | box | Orange ring around the box; pill text in the header |
 | `right`, `left` | box | Arrow to the next box in the row, or from it back to this one |
 | `span` | box | Relative width (default 1) |
+| `id`, `parts` | box | Target for `links`; small sub-boxes `{id, label, does}` inside the box |
 
 Keep two or three boxes per layer and four or five layers.

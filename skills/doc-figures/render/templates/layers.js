@@ -121,18 +121,19 @@ TEMPLATES.layers = async (spec, DF) => {
     sec.appendChild(row);
     root.appendChild(sec);
     if (i < layers.length - 1) {
-      const g = DF.el("div", "ly-gap" + ((l.links || []).length ? "" : " empty"));
+      const links = l.links?.length ? l.links : l.down || l.up ? [{down: l.down, up: l.up, center: true}] : [];
+      const g = DF.el("div", "ly-gap" + (links.length ? "" : " empty"));
       root.appendChild(g);
-      gaps.push({g, links: l.links || []});
+      gaps.push({g, links});
     }
   });
 
-  // Each link sits over the center of the box or part it names in `at`, so arrows land on what they touch.
+  // Each link sits over the center of the box or part it names in `at` (layer `down`/`up`: the figure), so arrows land on what they touch.
   const R = root.getBoundingClientRect();
   for (const {g, links} of gaps) {
     const h = g.getBoundingClientRect().height;
     for (const k of links) {
-      const t = ids.get(k.at);
+      const t = k.center ? root : ids.get(k.at);
       if (!t) { DF.warn(`link at unknown id "${k.at}"`); continue; }
       const r = t.getBoundingClientRect();
       const x = r.left - R.left + r.width / 2 + (k.shift || 0);
