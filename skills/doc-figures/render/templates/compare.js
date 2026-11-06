@@ -129,6 +129,7 @@ TEMPLATES.compare = async (spec, DF) => {
     let fits = true;
     for (const [box, b, P] of flows) {
       const r = await fitFlow(box, b, P.body.clientWidth);
+      DF.warnCrossings(r.crossings);
       fits &&= r.fits;
       used.later ||= r.used.later;
       used.external ||= r.used.external;

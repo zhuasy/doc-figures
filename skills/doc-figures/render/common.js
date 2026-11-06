@@ -16,7 +16,51 @@ function makeDF(SPEC, THEME) {
   const color = (name) => PALETTE[name] || name || PALETTE.slate;
   const tint = (hex, a = dark ? 0.16 : 0.12) => hex + Math.round(a * 255).toString(16).padStart(2, "0");
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const warn = (msg) => warnings.push(msg);
+  // A template may lay out twice (compare tries two directions), so a repeated warning is printed once.
+  const warn = (msg) => { if (!warnings.includes(msg)) warnings.push(msg); };
+
+  /*
+   * Spec checks from diagram research (Purchase, Cowan; C4 and Ilograph practice): every arrow says what it does
+   * with a specific verb, every box is a real named part with at least one arrow, and a figure stays small
+   * enough to hold at once. Matching is on the whole label, so "calls the OCR service" passes.
+   */
+  const VAGUE = new Set(["uses", "use", "calls", "call", "talks to", "connects to", "interacts with", "communicates with",
+    "depends on", "sends data", "data", "request", "requests", "response", "responds", "flow", "goes to", "to", "from"]);
+  const GENERIC = new Set(["api", "service", "server", "backend", "frontend", "db", "database", "client", "app",
+    "application", "system", "queue", "cache", "worker", "storage", "component", "module", "ui"]);
+  const MAX_BOXES = 8;
+  const lintArrow = (label, from, to) => {
+    if (!label || !String(label).trim()) warn(`arrow ${from} → ${to} has no label; say what it does ("saves the run")`);
+    else if (VAGUE.has(String(label).trim().toLowerCase()))
+      warn(`arrow ${from} → ${to} only says "${label}"; name the action ("submits the document")`);
+  };
+  const lintBox = (label) => {
+    if (label && GENERIC.has(String(label).trim().toLowerCase()))
+      warn(`box "${label}" names a kind of part; use its real name ("Upload API", not "API")`);
+  };
+  const lintCount = (n, what = "boxes") => {
+    if (n > MAX_BOXES) warn(`${n} ${what}; readers hold about 4 to 8 at once: split into an overview and a zoomed-in figure`);
+  };
+  const warnCrossings = (n) => {
+    if (n) warn(`${n} arrow crossing${n > 1 ? "s" : ""}; crossings hurt reading most: reorder nodes or edges, or split the figure`);
+  };
+
+  /** Crossings between axis-aligned segments of different edges. Touching at ends (shared nodes) doesn't count. */
+  function countCrossings(routes) {
+    const segs = routes.map((pts) => pts.slice(1).map((b, i) => [pts[i], b]));
+    const inside = (v, a, b) => v > Math.min(a, b) + 0.5 && v < Math.max(a, b) - 0.5;
+    let n = 0;
+    for (let i = 0; i < segs.length; i++)
+      for (let j = i + 1; j < segs.length; j++)
+        for (const [a, b] of segs[i])
+          for (const [c, d] of segs[j]) {
+            const h1 = Math.abs(a.y - b.y) < 0.5, h2 = Math.abs(c.y - d.y) < 0.5;
+            if (h1 === h2) continue;
+            const [h, v] = h1 ? [[a, b], [c, d]] : [[c, d], [a, b]];
+            if (inside(v[0].x, h[0].x, h[1].x) && inside(h[0].y, v[0].y, v[1].y)) n++;
+          }
+    return n;
+  }
 
   function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -137,6 +181,13 @@ function makeDF(SPEC, THEME) {
     walk(nodes);
     for (const e of edges) for (const end of [e.from, e.to]) if (!leaves[end]) warn(`edge points at unknown node "${end}"`);
     const usable = edges.filter((e) => leaves[e.from] && leaves[e.to]);
+    const ids = Object.keys(leaves);
+    ids.forEach((id) => lintBox(leaves[id].label));
+    usable.forEach((e) => lintArrow(e.label, e.from, e.to));
+    lintCount(ids.length);
+    if (usable.length)
+      for (const id of ids)
+        if (!usable.some((e) => e.from === id || e.to === id)) warn(`box "${leaves[id].label || id}" has no arrows; connect it or drop it`);
 
     let step = 0;
     const nums = usable.map((e) => (e.step !== undefined ? e.step : numbered && e.label ? ++step : null));
@@ -213,10 +264,12 @@ function makeDF(SPEC, THEME) {
     // Groups go under the wires, or their opaque fill hides every arrow inside them.
     groups.reverse().forEach((box) => container.prepend(box));
     if (laid.length !== usable.length) warn(`${usable.length - laid.length} edge(s) were not routed`);
+    const routes = [];
     for (const e of laid) {
       const i = +e.id.slice(1), o = origin[e.container || "root"], spec = usable[i];
       const s = e.sections[0];
       const pts = [s.startPoint, ...(s.bendPoints || []), s.endPoint].map((q) => ({x: q.x + o.x, y: q.y + o.y}));
+      routes.push(pts);
       w.line(pts, edgeKind(spec), {dashed: !!spec.later});
       if (labels[i]) {
         const l = e.labels[0];
@@ -227,7 +280,7 @@ function makeDF(SPEC, THEME) {
     container.style.width = g.width + "px";
     container.style.height = g.height + "px";
     return {
-      width: g.width, height: g.height,
+      width: g.width, height: g.height, crossings: countCrossings(routes),
       used: {
         later: usable.some((e) => e.later),
         external: Object.values(leaves).some((n) => n.external),
@@ -319,7 +372,7 @@ function makeDF(SPEC, THEME) {
 
   const canvasWidth = () => document.getElementById("stage").clientWidth;
 
-  const api = {spec, dark, PALETTE, color, tint, css, warn, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
+  const api = {spec, dark, PALETTE, color, tint, css, warn, lintArrow, lintBox, lintCount, warnCrossings, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
                layoutFlow, legend, style, canvasWidth, run, stage: () => document.getElementById("stage")};
   return api;
 }

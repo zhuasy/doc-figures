@@ -53,4 +53,10 @@ no page background, and still prints every `WARN`. Pass the file's HTML to `html
 
 ## Anywhere else
 
-Give the local PNG paths and the spec path. Alt text says what the figure shows, not "diagram".
+Give the local PNG paths and the spec path.
+
+## Alt text
+
+The alt text names the figure in one line: what it shows, not "diagram". The doc text next to the figure, or a
+`<details>` block under it, describes it in full: the parts, what moves between them and what the change does.
+Colors never carry meaning alone; the tags, dashes and labels in the figure already say it in words.

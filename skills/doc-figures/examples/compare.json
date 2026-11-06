@@ -38,7 +38,7 @@
       "blocks": [
         {"type": "flow", "nodes": [
           {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Pages through a table"},
-          {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access"},
+          {"id": "api", "label": "Tables API", "icon": "server", "color": "violet", "does": "Checks access"},
           {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Runs every query"}
         ], "edges": [
           {"from": "web", "to": "api", "label": "next page"},
@@ -52,8 +52,8 @@
       "blocks": [
         {"type": "flow", "nodes": [
           {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Pages through a table"},
-          {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access"},
-          {"id": "cache", "label": "Cache", "icon": "zap", "color": "teal", "does": "Keeps recent pages for 60 s", "tag": "new"},
+          {"id": "api", "label": "Tables API", "icon": "server", "color": "violet", "does": "Checks access"},
+          {"id": "cache", "label": "Page cache", "icon": "zap", "color": "teal", "does": "Keeps recent pages for 60 s", "tag": "new"},
           {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Runs cache misses only"}
         ], "edges": [
           {"from": "web", "to": "api", "label": "next page"},

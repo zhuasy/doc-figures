@@ -2,7 +2,7 @@ TEMPLATES.flow = async (spec, DF) => {
   const stage = DF.stage();
   const inner = DF.el("div");
   stage.appendChild(inner);
-  const {used} = await DF.layoutFlow(inner, {
+  const {used, crossings} = await DF.layoutFlow(inner, {
     nodes: spec.nodes || [],
     edges: spec.edges || [],
     direction: spec.direction || "auto",
@@ -11,6 +11,7 @@ TEMPLATES.flow = async (spec, DF) => {
     maxWidth: DF.canvasWidth(),
   });
   inner.style.margin = "0 auto";
+  DF.warnCrossings(crossings);
   const items = [];
   if (used.later) items.push({line: "plain", text: "request"}, {line: "later", dashed: true, text: "reply that arrives later"});
   if (used.external) items.push({box: "external", text: "another company's system"});

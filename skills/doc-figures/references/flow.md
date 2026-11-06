@@ -39,7 +39,8 @@ per kind of thing and keep it across figures; amber is for other companies' syst
 
 ## Tips
 
-- Five to eight boxes read at a glance. Past ten, split into an overview and a zoomed-in second figure.
+- Four to eight boxes read at a glance; past eight the renderer warns. Split into an overview and a zoomed-in
+  second figure.
 - Put the verb on the edge ("save the run") and the role in `does` ("Source of truth for runs").
 - A group is for a real boundary (our backend, one Kubernetes cluster, the customer's network).
 - Left to right fits about three to four boxes; more boxes fall back to top down automatically.
