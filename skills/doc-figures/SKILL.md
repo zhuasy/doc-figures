@@ -48,10 +48,15 @@ node <skill-folder>/render/render.mjs figs/*.json --out figs/out
 ```
 
 Each figure becomes `<name>.dark.png` and `<name>.light.png`, 1800 px wide for a column about 900 px wide. A
-set also gets contact sheets, four figures each. `--theme dark` renders one theme. `--html` also writes
-`<name>.html` for web pages that can't use an image (see `references/embedding.md`). Needs Node 22+ and Google
+set also gets contact sheets, four figures each. `--theme dark` renders one theme. Needs Node 22+ and Google
 Chrome. Playwright's headless shell (`npx playwright install --only-shell chromium`) is used when present: with
 it one figure takes about 0.4 s and twelve about 1.2 s.
+
+Two flags write HTML instead of, or next to, the PNGs (details in `references/embedding.md`):
+
+- `--html` also writes `<name>.html`: static HTML for a web page that takes raw HTML, with both themes.
+- `--t3` writes only `<name>.t3.html`, laid out for T3 Code's 728 px `html_render` frame. Use it to show a figure
+  inside a T3 thread: pass the file's HTML to `html_preview`, then to `html_render`. It still prints every `WARN`.
 
 ## 4. Check once
 
