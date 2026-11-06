@@ -1,8 +1,9 @@
 /* Shared runtime for every template: theme, helpers, flow layout and self-checks. */
 window.TEMPLATES = {};
-const DF = (() => {
-  const spec = window.SPEC || {};
-  const dark = (window.THEME || "dark") !== "light";
+/** Builds the helpers for one figure. render.mjs calls renderFigure() once per figure on one loaded page. */
+function makeDF(SPEC, THEME) {
+  const spec = SPEC || {};
+  const dark = (THEME || "dark") !== "light";
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   const warnings = [];
 
@@ -288,14 +289,14 @@ const DF = (() => {
       const sub = document.getElementById("subtitle");
       if (spec.subtitle) sub.textContent = spec.subtitle; else sub.remove();
       const name = spec.template || "flow";
-      await new Promise((ok, fail) => {
+      if (!TEMPLATES[name]) await new Promise((ok, fail) => {
         const s = el("script");
         s.src = `templates/${name}.js`;
         s.onload = ok;
         s.onerror = () => fail(new Error(`no template "${name}" (see render/templates/)`));
         document.head.appendChild(s);
       });
-      await TEMPLATES[name](spec, DF);
+      await TEMPLATES[name](spec, api);
       await document.fonts.ready;
       checks();
       const b = document.body;
@@ -318,6 +319,42 @@ const DF = (() => {
 
   const canvasWidth = () => document.getElementById("stage").clientWidth;
 
-  return {spec, dark, PALETTE, color, tint, css, warn, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
-          layoutFlow, legend, style, canvasWidth, run, stage: () => document.getElementById("stage")};
-})();
+  const api = {spec, dark, PALETTE, color, tint, css, warn, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
+               layoutFlow, legend, style, canvasWidth, run, stage: () => document.getElementById("stage")};
+  return api;
+}
+
+/**
+ * Render one figure on this page: put the page back to how page.html left it, then run the template.
+ * Resolves to {w, h, warnings} or {error}. Reusing the page skips re-parsing the ELK bundle per figure.
+ */
+let pristine = null;
+
+/**
+ * The rendered figure as static HTML for render.mjs --html: template CSS, the body's markup without scripts, and
+ * the inline style the page put on <html> and <body>. Layout is already absolute, so no script or ELK is needed.
+ */
+function exportFigure(suffix) {
+  const body = document.body.cloneNode(true);
+  body.querySelectorAll("script").forEach((s) => s.remove());
+  // Marker ids get the theme as a suffix, so two copies on one page never point at each other's arrowheads.
+  const html = body.innerHTML.replace(/(id="|url\(#)(arrow-[a-z]+)/g, `$1$2-${suffix}`);
+  const styles = [...document.head.querySelectorAll("style")].map((s) => s.textContent);
+  const hostStyle = [document.documentElement.getAttribute("style"), document.body.getAttribute("style")].filter(Boolean).join(";");
+  return {html, styles, hostStyle};
+}
+
+function renderFigure(spec, theme) {
+  const root = document.documentElement, body = document.body;
+  if (pristine == null) pristine = body.innerHTML;
+  else {
+    root.removeAttribute("style");
+    document.head.querySelectorAll("style").forEach((s) => s.remove());
+    for (const a of [...body.attributes]) body.removeAttribute(a.name);
+    body.innerHTML = pristine;
+  }
+  return makeDF(spec, theme).run().then(() => {
+    const d = body.dataset;
+    return d.done === "1" ? {w: +d.w, h: +d.h, warnings: JSON.parse(d.warnings)} : {error: d.error};
+  });
+}

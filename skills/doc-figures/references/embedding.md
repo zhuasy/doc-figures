@@ -35,6 +35,19 @@ Use one theme, matching the doc (dark unless the doc is light). For each final P
 Blobs are immutable: a changed image is a new upload, a new blob and a replaced block. If a step fails, read
 `guide(["topic.uploads"])` for the current flow.
 
+## Web pages that take HTML
+
+`--html` writes `<name>.html`: the same figure as static HTML with no scripts, about a tenth the size of the PNG
+pair. Each theme is a `<div class="docfig">` with a declarative shadow root, so its styles stay inside it, and
+`prefers-color-scheme` picks the theme. Copy the part between the two comments into the page, or load the file in
+an `<iframe>`.
+
+- Use it only where the page renders raw HTML, such as a docs site, an internal page or an artifact. GitHub and
+  most editors strip it: use the PNGs there.
+- Text uses the reader's system fonts, so text can wrap differently on Windows or Linux. The PNG is the checked
+  version.
+- The figure is a fixed width (900 px by default) and does not shrink on narrow screens.
+
 ## Anywhere else
 
 Give the local PNG paths and the spec path. Alt text says what the figure shows, not "diagram".
