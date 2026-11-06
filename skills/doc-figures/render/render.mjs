@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Render figure specs (JSON) to PNG with one headless Chrome:
-//   node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html]
+//   node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html] [--t3]
+// --html also writes <name>.html. --t3 writes only <name>.t3.html for T3 Code's html_render: laid out for its
+// 728 px frame, with no page background or padding.
 import {spawn} from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -11,13 +13,14 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PAGE = pathToFileURL(path.join(HERE, "page.html")).href;
 
 function parseArgs(argv) {
-  const opts = {files: [], out: "figures", theme: "both", sheet: true, html: false};
+  const opts = {files: [], out: "figures", theme: "both", sheet: true, html: false, t3: false};
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--out") opts.out = argv[++i];
     else if (a === "--theme") opts.theme = argv[++i];
     else if (a === "--no-sheet") opts.sheet = false;
     else if (a === "--html") opts.html = true;
+    else if (a === "--t3") opts.html = opts.t3 = true;
     else if (a === "-h" || a === "--help") opts.help = true;
     else opts.files.push(a);
   }
@@ -173,8 +176,12 @@ const escAttr = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
  * ids stay inside it; with both themes, prefers-color-scheme shows the one that matches the reader.
  * Text uses the reader's system fonts, so the PNG stays the checked version.
  */
-function figureHtml(spec, parts) {
-  const base = hostCss();
+function figureHtml(spec, parts, t3 = false) {
+  // For T3 Code's html_render the host app supplies the background and margins. A flow may lay out up to 10%
+  // wider than its canvas; the frame can't grow, so zoom that figure down to fit.
+  const wide = parts[0].w / 2 - BODY_PAD_X;
+  const fit = wide > T3_CONTENT ? `width: ${wide}px; zoom: ${(T3_CONTENT / wide).toFixed(4)};` : "width: 100%;";
+  const base = hostCss() + (t3 ? `\n:host { background: transparent; padding: 0; ${fit} }` : "");
   const figs = parts.map((p) => {
     const {html, styles, hostStyle} = p.exported;
     return `<div class="docfig" data-theme="${p.theme}"${hostStyle ? ` style="${escAttr(hostStyle)}"` : ""}>` +
@@ -189,7 +196,7 @@ function figureHtml(spec, parts) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>${title}</title>
-<body style="margin: 0">
+<body style="margin: 0${t3 ? "; background: transparent" : ""}">
 <!-- doc-figures: copy from here to "end figure" to embed. Edit the spec JSON and re-render, not this file. -->
 ${toggle}${figs}
 <!-- end figure -->
@@ -225,7 +232,10 @@ const withTimeout = (p, ms, msg) => {
   return Promise.race([p, expire]).finally(() => clearTimeout(timer));
 };
 
-async function renderOne(cdp, sid, spec, theme, outFile, html) {
+/** html_render's frame is 728 px with an 8 px gutter each side; body padding (30 px a side) is dropped on export. */
+const T3_CONTENT = 712, BODY_PAD_X = 60;
+
+async function renderOne(cdp, sid, spec, theme, outFile, {html = false, png = true} = {}) {
   await cdp.send("Emulation.setDeviceMetricsOverride", {width: 1600, height: 1200, deviceScaleFactor: 2, mobile: false}, sid);
   const r = await withTimeout(cdp.send("Runtime.evaluate", {
     expression: `renderFigure(${JSON.stringify(spec)}, ${JSON.stringify(theme)})`, awaitPromise: true, returnByValue: true,
@@ -233,8 +243,10 @@ async function renderOne(cdp, sid, spec, theme, outFile, html) {
   if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
   const {w, h, warnings, error} = r.result.value;
   if (error) throw new Error(error);
-  const shot = await cdp.send("Page.captureScreenshot", {format: "png", captureBeyondViewport: true, clip: {x: 0, y: 0, width: w, height: h, scale: 1}}, sid);
-  await fs.promises.writeFile(outFile, Buffer.from(shot.data, "base64"));
+  if (png) {
+    const shot = await cdp.send("Page.captureScreenshot", {format: "png", captureBeyondViewport: true, clip: {x: 0, y: 0, width: w, height: h, scale: 1}}, sid);
+    await fs.promises.writeFile(outFile, Buffer.from(shot.data, "base64"));
+  }
   const exported = html
     ? (await cdp.send("Runtime.evaluate", {expression: `exportFigure(${JSON.stringify(theme)})`, returnByValue: true}, sid)).result.value
     : null;
@@ -281,7 +293,7 @@ async function pool(n, jobs, open) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help || !opts.files.length) {
-    console.log("usage: node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html]");
+    console.log("usage: node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html] [--t3]");
     process.exit(opts.help ? 0 : 2);
   }
   const started = Date.now();
@@ -305,7 +317,7 @@ async function main() {
         const file = path.resolve(opts.out, `${spec.name}.${theme}.png`);
         const slot = results.push(null) - 1;
         jobs.push(async (sid) => {
-          try { results[slot] = {spec, theme, file, ...(await renderOne(cdp, sid, spec, theme, file, opts.html))}; }
+          try { results[slot] = {spec, theme, file, ...(await renderOne(cdp, sid, opts.t3 ? {...spec, width: T3_CONTENT + BODY_PAD_X} : spec, theme, file, {html: opts.html, png: !opts.t3}))}; }
           catch (err) {
             results[slot] = {spec, theme, err};
             // A timed-out template may still be running and would draw into the next figure.
@@ -321,7 +333,7 @@ async function main() {
         console.log(`FAIL ${r.spec.name} (${r.theme}): ${String(r.err.message || r.err).split("\n").slice(0, 4).join("\n  ")}`);
         continue;
       }
-      console.log(`${path.relative(process.cwd(), r.file)}  ${r.w}x${r.h}`);
+      if (!opts.t3) console.log(`${path.relative(process.cwd(), r.file)}  ${r.w}x${r.h}`);
       if (r.theme === themes[0]) {
         r.warnings.forEach((w) => console.log(`  WARN ${w}`));
         sheet.push({name: r.spec.name, file: r.file, warnings: r.warnings});
@@ -331,11 +343,11 @@ async function main() {
       for (const spec of specs) {
         const parts = results.filter((r) => r.spec === spec && !r.err);
         if (parts.length !== themes.length) continue;
-        const file = path.resolve(opts.out, `${spec.name}.html`);
-        await fs.promises.writeFile(file, figureHtml(spec, parts));
+        const file = path.resolve(opts.out, `${spec.name}${opts.t3 ? ".t3" : ""}.html`);
+        await fs.promises.writeFile(file, figureHtml(spec, parts, opts.t3));
         console.log(`${path.relative(process.cwd(), file)}  (HTML, ${themes.join(" and ")} theme)`);
       }
-    if (opts.sheet && sheet.length > 1) {
+    if (opts.sheet && !opts.t3 && sheet.length > 1) {
       // Four per sheet keeps each sheet short enough to inspect without heavy downscaling.
       const pages = [];
       for (let i = 0; i < sheet.length; i += 4) pages.push(sheet.slice(i, i + 4));

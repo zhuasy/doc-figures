@@ -48,6 +48,9 @@ an `<iframe>`.
   version.
 - The figure is a fixed width (900 px by default) and does not shrink on narrow screens.
 
+In T3 Code, use `--t3` instead: it writes only `<name>.t3.html`, laid out for the 728 px `html_render` frame with
+no page background, and still prints every `WARN`. Pass the file's HTML to `html_preview`, then `html_render`.
+
 ## Anywhere else
 
 Give the local PNG paths and the spec path. Alt text says what the figure shows, not "diagram".
