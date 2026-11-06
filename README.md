@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Diagrams for PRs and design docs, from a few lines of JSON.</b><br>
-  Your agent writes the spec. The skill lays it out, checks it, and renders light and dark PNGs in about a second.
+  Your agent writes the spec. The skill lays it out, checks it, and renders light and dark PNGs or SVGs in about a second.
 </p>
 
 <p align="center">
@@ -35,22 +35,25 @@ Ask your agent for a picture: *"add a diagram of the retry fix to this PR"*. It 
 and gets this:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/flow-small.dark.png">
-  <img alt="A flow: a browser retries an upload and the API asks storage which parts already arrived" src="docs/flow-small.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/flow-small.dark.svg">
+  <img alt="A flow: a browser retries an upload and the API asks storage which parts already arrived" src="docs/flow-small.light.svg">
 </picture>
 
 - **No coordinates.** The spec names the parts and the links. The skill places boxes and routes arrows.
 - **Checked on every render.** It warns about overlapping boxes, clipped labels and text too small to read.
-- **Light and dark.** Both PNGs come out together, and GitHub shows the one that matches the reader's theme.
-- **Sharp.** 1800 px wide for a 900 px column, so text stays crisp on retina screens.
+- **Light and dark.** Both themes come out together, and GitHub shows the one that matches the reader's theme.
+- **PNG, SVG or HTML.** PNGs are 1800 px wide for a 900 px column. `--svg` adds vector copies about a seventh the
+  size, and `--html` adds a static HTML version for pages that take raw HTML.
+
+Every figure on this page is an SVG that the skill rendered from [`examples/`](skills/doc-figures/examples) with `--svg`.
 
 ## Seven templates
 
 ### `compare` · before and after
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/compare-upload-retry.dark.png">
-  <img alt="Before and after: a retry sends only the upload parts that are missing" src="docs/compare-upload-retry.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/compare-upload-retry.dark.svg">
+  <img alt="Before and after: a retry sends only the upload parts that are missing" src="docs/compare-upload-retry.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (39 lines of JSON)</summary>
@@ -106,8 +109,8 @@ and gets this:
 ### `sequence` · who calls whom, including replies that arrive later
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/sequence.dark.png">
-  <img alt="A sequence: an OCR service calls a webhook later, and the engine saves the result" src="docs/sequence.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/sequence.dark.svg">
+  <img alt="A sequence: an OCR service calls a webhook later, and the engine saves the result" src="docs/sequence.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (25 lines of JSON)</summary>
@@ -149,8 +152,8 @@ and gets this:
 ### `stack` · stacked PRs, what each one needs, merge order
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/stack.dark.png">
-  <img alt="A stack of four PRs, each naming what it needs from the one below" src="docs/stack.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/stack.dark.svg">
+  <img alt="A stack of four PRs, each naming what it needs from the one below" src="docs/stack.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (19 lines of JSON)</summary>
@@ -186,8 +189,8 @@ and gets this:
 ### `card` · the fields of a record, and what changed
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/card-span.dark.png">
-  <img alt="A record card: two new fields and one changed field on a job span" src="docs/card-span.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/card-span.dark.svg">
+  <img alt="A record card: two new fields and one changed field on a job span" src="docs/card-span.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (28 lines of JSON)</summary>
@@ -232,8 +235,8 @@ and gets this:
 ### `timeline` · where the time went
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/timeline-trip.dark.png">
-  <img alt="A timeline: a failed try, a wait, then a successful retry" src="docs/timeline-trip.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/timeline-trip.dark.svg">
+  <img alt="A timeline: a failed try, a wait, then a successful retry" src="docs/timeline-trip.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (19 lines of JSON)</summary>
@@ -269,8 +272,8 @@ and gets this:
 ### `layers` · a layered architecture, both directions
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/layers.dark.png">
-  <img alt="Four layers, from user interfaces down to core capabilities, with arrows both ways between them" src="docs/layers.light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/layers.dark.svg">
+  <img alt="Four layers, from user interfaces down to core capabilities, with arrows both ways between them" src="docs/layers.light.svg">
 </picture>
 
 <details><summary>The spec for this picture (50 lines of JSON)</summary>
@@ -352,6 +355,17 @@ To render by hand:
 ```sh
 node skills/doc-figures/render/render.mjs skills/doc-figures/examples/*.json --out out
 ```
+
+| Flag | Writes |
+|---|---|
+| none | `<name>.dark.png` and `<name>.light.png`, plus contact sheets for a set |
+| `--svg` | also `<name>.dark.svg` and `<name>.light.svg`, for repository Markdown such as this README |
+| `--html` | also `<name>.html`, both themes in one static file for pages that take raw HTML |
+| `--t3` | only `<name>.t3.html`, sized for T3 Code's `html_render` |
+| `--theme dark` | one theme only (`light` works too) |
+
+SVG text uses the reader's system font, so a line can be a few pixels wider or narrower than in the PNG. Line
+breaks never move, because the renderer places each line where Chrome laid it out.
 
 The specs behind every image on this page are in [`skills/doc-figures/examples/`](skills/doc-figures/examples).
 
