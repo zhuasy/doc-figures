@@ -20,7 +20,12 @@ don't load reliably for reviewers.
 
 ## Repository Markdown
 
-Save the PNGs next to the doc and link relatively. Use the `<picture>` block above with relative paths.
+Render with `--svg`, save the SVGs next to the doc and link them relatively in the `<picture>` block above. SVGs
+stay sharp at any zoom and are about a seventh the size of the PNG pair, so they diff and review well in git.
+
+- Each line of text is placed where Chrome laid it out, so text never rewraps. It uses the reader's system font
+  (Helvetica Neue on a Mac, Arial on Windows), so a line can end up a few pixels wider or narrower.
+- Only GitHub renders the `<picture>` theme switch. Elsewhere, link the theme that matches the page.
 
 ## Claude Docs
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Render figure specs (JSON) to PNG with one headless Chrome:
-//   node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html] [--t3]
-// --html also writes <name>.html. --t3 writes only <name>.t3.html for T3 Code's html_render: laid out for its
-// 728 px frame, with no page background or padding.
+//   node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--svg] [--html] [--t3]
+// --svg also writes <name>.<theme>.svg (vector, see svg.js). --html also writes <name>.html. --t3 writes only
+// <name>.t3.html for T3 Code's html_render: laid out for its 728 px frame, with no page background or padding.
 import {spawn} from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -13,12 +13,13 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PAGE = pathToFileURL(path.join(HERE, "page.html")).href;
 
 function parseArgs(argv) {
-  const opts = {files: [], out: "figures", theme: "both", sheet: true, html: false, t3: false};
+  const opts = {files: [], out: "figures", theme: "both", sheet: true, svg: false, html: false, t3: false};
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--out") opts.out = argv[++i];
     else if (a === "--theme") opts.theme = argv[++i];
     else if (a === "--no-sheet") opts.sheet = false;
+    else if (a === "--svg") opts.svg = true;
     else if (a === "--html") opts.html = true;
     else if (a === "--t3") opts.html = opts.t3 = true;
     else if (a === "-h" || a === "--help") opts.help = true;
@@ -235,7 +236,7 @@ const withTimeout = (p, ms, msg) => {
 /** html_render's frame is 728 px with an 8 px gutter each side; body padding (30 px a side) is dropped on export. */
 const T3_CONTENT = 712, BODY_PAD_X = 60;
 
-async function renderOne(cdp, sid, spec, theme, outFile, {html = false, png = true} = {}) {
+async function renderOne(cdp, sid, spec, theme, outFile, {html = false, png = true, svg = false} = {}) {
   await cdp.send("Emulation.setDeviceMetricsOverride", {width: 1600, height: 1200, deviceScaleFactor: 2, mobile: false}, sid);
   const r = await withTimeout(cdp.send("Runtime.evaluate", {
     expression: `renderFigure(${JSON.stringify(spec)}, ${JSON.stringify(theme)})`, awaitPromise: true, returnByValue: true,
@@ -246,6 +247,10 @@ async function renderOne(cdp, sid, spec, theme, outFile, {html = false, png = tr
   if (png) {
     const shot = await cdp.send("Page.captureScreenshot", {format: "png", captureBeyondViewport: true, clip: {x: 0, y: 0, width: w, height: h, scale: 1}}, sid);
     await fs.promises.writeFile(outFile, Buffer.from(shot.data, "base64"));
+  }
+  if (svg) {
+    const doc = (await cdp.send("Runtime.evaluate", {expression: "figureSvg()", returnByValue: true}, sid)).result.value;
+    await fs.promises.writeFile(outFile.replace(/\.png$/, ".svg"), doc);
   }
   const exported = html
     ? (await cdp.send("Runtime.evaluate", {expression: `exportFigure(${JSON.stringify(theme)})`, returnByValue: true}, sid)).result.value
@@ -293,7 +298,7 @@ async function pool(n, jobs, open) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help || !opts.files.length) {
-    console.log("usage: node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--html] [--t3]");
+    console.log("usage: node render.mjs spec.json [more.json ...] [--out DIR] [--theme both|dark|light] [--no-sheet] [--svg] [--html] [--t3]");
     process.exit(opts.help ? 0 : 2);
   }
   const started = Date.now();
@@ -317,7 +322,7 @@ async function main() {
         const file = path.resolve(opts.out, `${spec.name}.${theme}.png`);
         const slot = results.push(null) - 1;
         jobs.push(async (sid) => {
-          try { results[slot] = {spec, theme, file, ...(await renderOne(cdp, sid, opts.t3 ? {...spec, width: T3_CONTENT + BODY_PAD_X} : spec, theme, file, {html: opts.html, png: !opts.t3}))}; }
+          try { results[slot] = {spec, theme, file, ...(await renderOne(cdp, sid, opts.t3 ? {...spec, width: T3_CONTENT + BODY_PAD_X} : spec, theme, file, {html: opts.html, png: !opts.t3, svg: opts.svg && !opts.t3}))}; }
           catch (err) {
             results[slot] = {spec, theme, err};
             // A timed-out template may still be running and would draw into the next figure.
@@ -333,7 +338,7 @@ async function main() {
         console.log(`FAIL ${r.spec.name} (${r.theme}): ${String(r.err.message || r.err).split("\n").slice(0, 4).join("\n  ")}`);
         continue;
       }
-      if (!opts.t3) console.log(`${path.relative(process.cwd(), r.file)}  ${r.w}x${r.h}`);
+      if (!opts.t3) console.log(`${path.relative(process.cwd(), r.file)}  ${r.w}x${r.h}${opts.svg ? "  (and .svg)" : ""}`);
       if (r.theme === themes[0]) {
         r.warnings.forEach((w) => console.log(`  WARN ${w}`));
         sheet.push({name: r.spec.name, file: r.file, warnings: r.warnings});

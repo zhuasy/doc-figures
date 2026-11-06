@@ -1,6 +1,6 @@
 ---
 name: doc-figures
-description: "Make polished explanatory figures for PRs, design docs, PRDs and Claude Docs from a short JSON spec: big-picture system flows, before/after comparisons, PR stacks, call sequences, record fields and timelines. Renders light and dark PNGs in about a second and checks them for overlaps and tiny text. Use when a PR or document needs a diagram, picture, graphic or visual, when the user says picturefy or wants it easy on the eyes, or to replace Mermaid or ASCII diagrams."
+description: "Make polished explanatory figures for PRs, design docs, PRDs and Claude Docs from a short JSON spec: big-picture system flows, before/after comparisons, PR stacks, call sequences, record fields and timelines. Renders light and dark PNGs or SVGs in about a second and checks them for overlaps and tiny text. Use when a PR or document needs a diagram, picture, graphic or visual, when the user says picturefy or wants it easy on the eyes, or to replace Mermaid or ASCII diagrams."
 ---
 
 # Doc figures
@@ -52,8 +52,10 @@ set also gets contact sheets, four figures each. `--theme dark` renders one them
 Chrome. Playwright's headless shell (`npx playwright install --only-shell chromium`) is used when present: with
 it one figure takes about 0.4 s and twelve about 1.2 s.
 
-Two flags write HTML instead of, or next to, the PNGs (details in `references/embedding.md`):
+Three flags write other formats next to, or instead of, the PNGs (details in `references/embedding.md`):
 
+- `--svg` also writes `<name>.dark.svg` and `<name>.light.svg`: vector copies, about a seventh the size, for
+  repository Markdown such as a README. Line breaks are fixed, so the text cannot rewrap.
 - `--html` also writes `<name>.html`: static HTML for a web page that takes raw HTML, with both themes.
 - `--t3` writes only `<name>.t3.html`, laid out for T3 Code's 728 px `html_render` frame. Use it to show a figure
   inside a T3 thread: pass the file's HTML to `html_preview`, then to `html_render`. It still prints every `WARN`.
