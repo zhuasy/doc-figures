@@ -6,7 +6,7 @@ TEMPLATES.stack = async (spec, DF) => {
       flex: none; width: 28px; height: 28px; margin: 0 8px; border-radius: 50%; display: grid; place-items: center;
       font-weight: 800; font-size: 13px; background: var(--muted); color: var(--bg);
     }
-    .stk-badge.this { background: var(--hilite-edge); }
+    .stk-badge.this { background: var(--hilite); }
     .stk-badge.merged { background: transparent; border: 1.5px solid var(--ok-edge); color: var(--ok); }
     .stk-badge svg { width: 15px; height: 15px; stroke-width: 3; }
     .stk-badge.none { background: none; }

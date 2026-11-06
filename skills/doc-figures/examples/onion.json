@@ -1,0 +1,37 @@
+[
+  {
+    "name": "onion-two-designs",
+    "template": "onion",
+    "title": "Two ways to reach a vendor's files",
+    "subtitle": "Illustrative. One search call, outermost layer first; orange chips show where the vendor token is readable",
+    "onions": [
+      {
+        "label": "A. Proxy to the vendor's MCP server",
+        "sublabel": "We run one layer; the vendor runs the rest",
+        "entry": "Agent calls files.search",
+        "verdictKey": "Depth:",
+        "verdict": "4 layers. The vendor's server sees the token, as it must.",
+        "layers": [
+          {"title": "Agent harness", "does": "Sends one MCP tools/call", "icon": "bot", "color": "blue"},
+          {"title": "Credential proxy", "does": "Checks the caller, adds the vendor token", "icon": "shield", "color": "violet", "changed": true, "chips": [{"text": "vendor token", "secret": true}]},
+          {"title": "Vendor MCP server", "does": "Turns the tool call into API calls", "icon": "server", "external": true, "chips": [{"text": "vendor token", "secret": true}]},
+          {"title": "Vendor files API", "does": "Searches the files", "icon": "cloud", "external": true}
+        ]
+      },
+      {
+        "label": "B. Our code, served as MCP",
+        "sublabel": "We run three layers, including the sandbox",
+        "entry": "Agent calls files.search",
+        "verdictKey": "Depth:",
+        "verdict": "5 layers. Only our host sees the token.",
+        "layers": [
+          {"title": "Agent harness", "does": "Sends one MCP tools/call", "icon": "bot", "color": "blue"},
+          {"title": "Credential proxy", "does": "Checks the caller, picks the function", "icon": "shield", "color": "violet"},
+          {"title": "Function host", "does": "Adds the token to outbound requests", "icon": "key-round", "color": "violet", "changed": true, "chips": [{"text": "vendor token", "secret": true}]},
+          {"title": "Function sandbox", "does": "Runs our generated client code", "icon": "code", "color": "teal", "chips": [{"text": "no token", "ok": true}]},
+          {"title": "Vendor files API", "does": "Searches the files", "icon": "cloud", "external": true}
+        ]
+      }
+    ]
+  }
+]

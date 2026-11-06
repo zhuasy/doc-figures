@@ -9,7 +9,7 @@ TEMPLATES.compare = async (spec, DF) => {
 .cmp-head { align-self: flex-start; }
 .cmp-title { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
   padding: 4px 10px; border-radius: 999px; background: var(--edge); color: var(--ink); line-height: 1.2; }
-.accent .cmp-title { background: var(--hilite-edge); color: var(--bg); }
+.accent .cmp-title { background: var(--hilite); color: var(--bg); }
 .cmp-caption { margin-top: 10px; font-size: 14.5px; color: var(--body); }
 .cmp-body { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
 .cmp-arrow { display: grid; place-items: center; color: var(--line); }
@@ -34,7 +34,7 @@ TEMPLATES.compare = async (spec, DF) => {
   font-weight: 700; font-size: 15px; border: 1.5px solid var(--edge); color: var(--ink); }
 .cmp-chip.sent { background: ${DF.tint(c("blue"), DF.dark ? 0.22 : 0.14)}; border-color: ${c("blue")}; }
 .cmp-chip.done { background: ${DF.tint(c("green"), DF.dark ? 0.14 : 0.1)}; border-color: var(--ok-edge); color: var(--ok); }
-.cmp-chip.new { background: var(--ok-edge); border-color: var(--ok-edge); color: var(--bg); }
+.cmp-chip.new { background: var(--ok); border-color: var(--ok); color: var(--bg); }
 .cmp-chip.fail { background: ${DF.tint(c("red"), DF.dark ? 0.16 : 0.1)}; border-color: var(--fail-edge); color: var(--fail); }
 .cmp-chip.skipped { border-style: dashed; border-color: var(--faint); color: var(--faint); }
 .cmp-chip.muted { border-color: var(--edge); color: var(--faint); }
