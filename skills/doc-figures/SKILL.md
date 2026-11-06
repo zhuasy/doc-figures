@@ -43,8 +43,10 @@ node <skill-folder>/render/render.mjs figs/*.json --out figs/out
 ```
 
 Each figure becomes `<name>.dark.png` and `<name>.light.png`, 1800 px wide for a column about 900 px wide. A
-set also gets contact sheets, four figures each. Ten figures take about three seconds. `--theme dark` renders
-one theme. Needs Node 22+ and Google Chrome (or Playwright's Chromium).
+set also gets contact sheets, four figures each. `--theme dark` renders one theme. `--html` also writes
+`<name>.html` for web pages that can't use an image (see `references/embedding.md`). Needs Node 22+ and Google
+Chrome. Playwright's headless shell (`npx playwright install --only-shell chromium`) is used when present: with
+it one figure takes about 0.4 s and twelve about 1.2 s.
 
 ## 4. Check once
 

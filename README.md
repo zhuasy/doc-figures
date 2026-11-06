@@ -344,7 +344,8 @@ pnpm dlx skills add zhuasy/doc-figures   # or bunx skills add zhuasy/doc-figures
 ```
 
 Works with Claude Code, Codex, Cursor and other agents that read skills. Needs Node 22+ and Google Chrome or
-Chromium (set `CHROME_PATH` if it lives somewhere unusual).
+Chromium (set `CHROME_PATH` if it lives somewhere unusual). Playwright's headless shell
+(`npx playwright install --only-shell chromium`) renders the same pixels about twice as fast and is used when present.
 
 To render by hand:
 
