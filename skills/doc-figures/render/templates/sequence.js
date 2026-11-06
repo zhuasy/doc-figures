@@ -27,6 +27,11 @@ TEMPLATES.sequence = async (spec, DF) => {
   const colW = W / Math.max(actors.length, 1);
   if (colW < 120) DF.warn(`${actors.length} actors leave ${Math.round(colW)}px per column; drop actors or split the figure`);
   const cardW = Math.round(Math.min(212, colW - 14));
+  const calls = (spec.messages || []).filter((m) => m.from != null);
+  actors.forEach((a) => DF.lintBox(a.label));
+  calls.forEach((m) => DF.lintArrow(m.label, m.from, m.to));
+  for (const a of actors)
+    if (calls.length && !calls.some((m) => m.from === a.id || m.to === a.id)) DF.warn(`actor "${a.label || a.id}" sends and gets nothing; drop it`);
 
   const cx = {};
   const heads = actors.map((a, i) => {

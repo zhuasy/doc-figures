@@ -5,7 +5,7 @@
   "nodes": [
     {"id": "web", "label": "Web app", "icon": "monitor", "color": "blue", "does": "Shows runs live and pages through big tables"},
     {"id": "backend", "label": "Our backend", "children": [
-      {"id": "api", "label": "API", "icon": "server", "color": "violet", "does": "Checks access and saves new runs"},
+      {"id": "api", "label": "Runs API", "icon": "server", "color": "violet", "does": "Checks access and saves new runs"},
       {"id": "queue", "label": "Job queue", "icon": "list-ordered", "color": "teal", "does": "Holds steps until a worker is free"},
       {"id": "engine", "label": "Engine", "icon": "cpu", "color": "teal", "does": "Runs each step and retries what failed", "changed": true},
       {"id": "db", "label": "Postgres", "icon": "database", "color": "slate", "does": "Source of truth for runs, rows and steps"},

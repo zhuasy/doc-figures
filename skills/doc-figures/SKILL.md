@@ -26,10 +26,15 @@ A chart of measured data series (bars, lines, distributions) is not a template: 
 
 ## 2. Write the spec
 
-- **One concrete example.** Invent names and numbers by default and say "Illustrative" in the subtitle. Dig up
-  real data only when the figure claims a measurement. Numbers must add up.
-- **Plain words.** Use the doc's terms. Each box says what it does, not only its name. Code identifiers appear
-  only where the reader will search for them.
+- **Real parts, example data.** Every box and arrow is a part that exists in the system or the change; never add
+  one to fill out the picture. Example values (names, numbers, ids) may be invented: say "Illustrative" in the
+  subtitle. Dig up real data only when the figure claims a measurement. Numbers must add up.
+- **One subject, four to eight boxes.** Show runtime or deploy, structure or order, not all of them. Calls that go
+  back and forth are a `sequence`, not a row of boxes.
+- **Real names, specific verbs.** Each box has its real name ("Upload API", not "API") and says what it does.
+  Each arrow points one way and says what it does in that direction ("submits the document", not "uses" or
+  "calls"); a reply is its own arrow. Use the doc's terms. Code identifiers appear only where the reader will
+  search for them.
 - **Mark the change.** `changed: true` turns a box or arrow orange; everything else is context.
 - **One meaning per color** across a set. Amber is another company's system; orange means "look here".
 - Put a set of figures in one JSON array or several files and render them in one call.
@@ -50,7 +55,8 @@ it one figure takes about 0.4 s and twelve about 1.2 s.
 
 ## 4. Check once
 
-- Fix every `WARN` line in the spec: shorten a label, drop a box, or split the figure. Re-render.
+- Fix every `WARN` line in the spec: shorten a label, drop a box, or split the figure. Re-render. Arrow crossings
+  hurt reading more than anything else; reorder nodes or edges in the spec to remove them.
 - Then look once at the contact sheets, or the single PNG (Read in Claude Code, `view_image` in Codex). Is the
   takeaway obvious in five seconds? Is every fact right? Don't open each PNG separately.
 
