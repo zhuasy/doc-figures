@@ -1,6 +1,6 @@
 ---
 name: doc-figures
-description: "Make polished explanatory figures for PRs, design docs, PRDs and Claude Docs from a short JSON spec: big-picture system flows, before/after comparisons, PR stacks, call sequences, record fields, timelines and nested layers (onion), with a checked freeform layout when none fits. Renders light and dark PNGs or SVGs in about a second and checks them for overlaps and tiny text. Use when a PR or document needs a diagram, picture, graphic or visual, when the user says picturefy or wants it easy on the eyes, or to replace Mermaid or ASCII diagrams."
+description: "Make polished explanatory figures for PRs, design docs, PRDs, Claude Docs and explainers of hard ideas from a short JSON spec: big-picture system flows, before/after comparisons, PR stacks, call sequences, record fields, timelines, nested layers (onion), worked step-by-step mechanisms, feedback loops and trees, with a checked freeform layout when none fits. Renders light and dark PNGs or SVGs in about a second and checks them for overlaps and tiny text. Use when a PR or document needs a diagram, picture, graphic or visual, when the user says picturefy or wants it easy on the eyes, or to replace Mermaid or ASCII diagrams."
 ---
 
 # Doc figures
@@ -22,11 +22,37 @@ Write the takeaway in one sentence, then pick the template. Read only that templ
 | `timeline` | Where time went: waterfalls, retries, waits, zooming into one part | `references/timeline.md` |
 | `layers` | A layered architecture where each layer works both ways with the next; ring one box | `references/layers.md` |
 | `onion` | Layers inside layers: what wraps what, where a secret is readable, how deep two designs nest | `references/onion.md` |
+| `steps` | How a mechanism works, run on a tiny example: state, operation and why, then the general rule and its limit | `references/steps.md` |
+| `loop` | Cause and feedback: quantities that push each other round a ring, and whether the loop settles or runs away | `references/loop.md` |
+| `tree` | One thing that splits: hierarchies, decision trees, frequency trees that turn percentages into counts | `references/tree.md` |
 
 If none fits, use `freeform` (`references/freeform.md`): you write the layout as HTML with the house classes, and
 the renderer still themes and checks it.
 
 A chart of measured data series (bars, lines, distributions) is not a template: see `references/charts.md`.
+
+## Explaining an idea
+
+When the figures teach a concept to someone new to the field (not a PR or a system), plan the set before the
+specs. Readers forget names; they keep a mechanism they watched run.
+
+1. **Claim first.** The first figure states the idea in one plain sentence and shows its result.
+2. **Ground it in a picture.** If the idea happens in space (moons round a planet, a stone on a slope, cells in a
+   pond), draw the real thing once, side or top view, with `freeform` and inline SVG. Bars and tables organize;
+   only a picture shows what "in line" or "at right angles to the slope" looks like.
+3. **Run the mechanism on numbers.** Use `steps` (or `tree`, `loop`) with the source's own small example. Show
+   every step the conclusion depends on; a named step that is not shown is the commonest failure.
+4. **State the rule, then its limit.** After the example, say the general rule in words a reader could apply to a
+   case the figures do not show (`rule`). Add `limit` only for a real condition that breaks the mechanism ("no
+   frost, no lift, no creep"); leave it out rather than fill it with a scope note or a slower case.
+5. **Name the wrong idea.** If there is a common misconception, show it beside the truth (`myth`, or `compare`
+   with `"arrow": false`) and say what rules it out.
+6. **Plain words, one meaning each.** Define each term the first time it appears, in the figure itself. Never let
+   one label mean two things (copies A, B, C and tallies A, B, C). Write "almost never", not "never", for
+   statistical claims. Use `hl`, not `changed`: nothing is changing in an explainer.
+7. **Three to five figures.** Each answers one question: what happens, how, why, when not, what people get wrong.
+   Check every number against the source, including counts ("three trips", "two rounds"): a figure's panel count
+   is not the source's count, and a wrong number teaches a wrong idea.
 
 ## 2. Write the spec
 
