@@ -1,0 +1,246 @@
+[
+  {
+    "template": "steps",
+    "title": "Why an option's price ignores where the stock will go",
+    "subtitle": "Illustrative: one period, two outcomes, no interest.",
+    "steps": [
+      {
+        "title": "The bet",
+        "state": [
+          {
+            "type": "kv",
+            "items": [
+              [
+                "Stock today",
+                "$100"
+              ],
+              [
+                "Tomorrow",
+                "$120 or $80"
+              ],
+              [
+                "Option pays",
+                "$20 or $0"
+              ]
+            ]
+          }
+        ],
+        "op": "Find a mix of stock and cash that pays the same",
+        "why": "If two things always pay the same, they must cost the same."
+      },
+      {
+        "title": "Copy it with stock",
+        "state": [
+          {
+            "type": "grid",
+            "cols": [
+              "$120",
+              "$80"
+            ],
+            "rowLabels": [
+              "\u00bd share",
+              "Borrow $40",
+              "Total"
+            ],
+            "rows": [
+              [
+                "60",
+                "40"
+              ],
+              [
+                "\u221240",
+                "\u221240"
+              ],
+              [
+                {
+                  "text": "20",
+                  "hl": true
+                },
+                {
+                  "text": "0",
+                  "hl": true
+                }
+              ]
+            ]
+          }
+        ],
+        "op": "Price the copy today",
+        "why": "Half a share costs $50; the loan brings $40 back."
+      },
+      {
+        "title": "The price",
+        "hl": true,
+        "state": [
+          {
+            "type": "bars",
+            "items": [
+              {
+                "label": "\u00bd share",
+                "value": 50,
+                "show": "$50"
+              },
+              {
+                "label": "loan",
+                "value": 40,
+                "show": "\u2212$40",
+                "state": "muted"
+              },
+              {
+                "label": "option",
+                "value": 10,
+                "show": "$10",
+                "hl": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "rule": "The option costs what its copy costs. The chances of $120 or $80 never entered the sum.",
+    "limit": "the copy cannot be built: for example, the stock cannot be traded at every step.",
+    "myth": "Traders who expect a rise pay more. They don't: the copy costs the same either way."
+  },
+  {
+    "template": "steps",
+    "title": "A push near the top saves more time",
+    "subtitle": "Illustrative: charge rises fast, then slowly; the flash comes at 100.",
+    "steps": [
+      {
+        "title": "Low cell gets +15",
+        "state": [
+          {
+            "type": "bars",
+            "max": 100,
+            "line": {
+              "value": 100,
+              "label": "flash"
+            },
+            "items": [
+              {
+                "label": "before",
+                "value": 20
+              },
+              {
+                "label": "after",
+                "value": 35,
+                "hl": true
+              }
+            ]
+          }
+        ],
+        "op": "Saves 0.7 s",
+        "why": "Low down the charge rises fast, so 15 units is a short stretch."
+      },
+      {
+        "title": "High cell gets +15",
+        "state": [
+          {
+            "type": "bars",
+            "max": 100,
+            "line": {
+              "value": 100,
+              "label": "flash"
+            },
+            "items": [
+              {
+                "label": "before",
+                "value": 80
+              },
+              {
+                "label": "after",
+                "value": 95,
+                "hl": true
+              }
+            ]
+          }
+        ],
+        "op": "Saves 3.1 s",
+        "why": "Near the top it rises slowly, so the same 15 units is a long stretch."
+      }
+    ],
+    "rule": "The same push saves more time the closer a cell is to flashing."
+  },
+  {
+    "template": "steps",
+    "title": "Merge order does not matter",
+    "subtitle": "Illustrative: two copies, the same two rows, merged in either order.",
+    "connect": false,
+    "steps": [
+      {
+        "title": "A merges B's row",
+        "state": [
+          {
+            "type": "grid",
+            "cols": [
+              "A",
+              "B"
+            ],
+            "rowLabels": [
+              "A's row",
+              "B's row",
+              "Result"
+            ],
+            "rows": [
+              [
+                "3",
+                "0"
+              ],
+              [
+                "0",
+                "2"
+              ],
+              [
+                {
+                  "text": "3",
+                  "hl": true
+                },
+                {
+                  "text": "2",
+                  "hl": true
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "B merges A's row",
+        "state": [
+          {
+            "type": "grid",
+            "cols": [
+              "A",
+              "B"
+            ],
+            "rowLabels": [
+              "B's row",
+              "A's row",
+              "Result"
+            ],
+            "rows": [
+              [
+                "0",
+                "2"
+              ],
+              [
+                "3",
+                "0"
+              ],
+              [
+                {
+                  "text": "3",
+                  "hl": true
+                },
+                {
+                  "text": "2",
+                  "hl": true
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "rule": "Taking the larger of each tally gives the same row whichever copy merges first."
+  }
+]
