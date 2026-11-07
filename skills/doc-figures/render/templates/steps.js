@@ -29,6 +29,7 @@ TEMPLATES.steps = async (spec, DF) => {
 .st-chip.ok { border-color: var(--ok-edge); color: var(--ok); background: ${DF.tint(c("green"), DF.dark ? 0.14 : 0.1)}; }
 .st-chip.fail { border-color: var(--fail-edge); color: var(--fail); background: ${DF.tint(c("red"), DF.dark ? 0.16 : 0.1)}; }
 .st-chip.muted { border: 1.5px dashed var(--faint); color: var(--faint); background: none; }
+.st-chip.out { border: 1.5px dashed var(--faint); color: var(--muted); background: none; text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: var(--fail); }
 .st-bars { position: relative; display: flex; align-items: flex-end; gap: 8px; height: var(--bh, 110px); border-bottom: 1.5px solid var(--line); padding: 0 2px; }
 .st-col { flex: 1 1 0; min-width: 0; height: 100%; position: relative; }
 .st-bar { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 5px 5px 0 0; background: ${c("blue")}; }
@@ -38,6 +39,8 @@ TEMPLATES.steps = async (spec, DF) => {
 .st-bar.muted { background: var(--edge); }
 .st-col b { position: absolute; left: 50%; transform: translateX(-50%); margin-bottom: 3px; font-size: 13px; color: var(--ink); white-space: nowrap; }
 .st-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--hilite-edge); }
+.st-line.ref { border-top-color: var(--muted); }
+.st-line.ref i { color: var(--muted); }
 .st-line i { position: absolute; right: 0; bottom: 2px; font-style: normal; font-size: 12.5px; font-weight: 600; color: var(--hilite); background: var(--surface); padding: 0 3px; }
 .st-names { display: flex; gap: 8px; padding: 4px 2px 0; }
 .st-names span { flex: 1 1 0; min-width: 0; text-align: center; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
@@ -48,6 +51,8 @@ TEMPLATES.steps = async (spec, DF) => {
 .st-grid td.hl { background: var(--hilite-glow); box-shadow: inset 0 0 0 1.5px var(--hilite-edge); }
 .st-grid td.ok { color: var(--ok); box-shadow: inset 0 0 0 1.5px var(--ok-edge); }
 .st-grid td.fail { color: var(--fail); box-shadow: inset 0 0 0 1.5px var(--fail-edge); }
+.st-grid td.out { background: none; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--faint); text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: var(--fail); }
+.st-grid td.muted { color: var(--faint); }
 .st-kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 14px; }
 .st-kv span:nth-child(odd) { color: var(--muted); }
 .st-kv span:nth-child(even) { color: var(--ink); font-weight: 600; }
@@ -65,7 +70,7 @@ TEMPLATES.steps = async (spec, DF) => {
 
   const ARROW = '<span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M8.5 3.5L13 8l-4.5 4.5"/></svg></span>';
   const item = (it) => (typeof it === "object" && it !== null ? it : {text: it});
-  const cls = (it) => ["hl", "ok", "fail", "muted"].find((k) => it[k] || it.state === k) || "";
+  const cls = (it) => ["hl", "ok", "fail", "muted", "out"].find((k) => it[k] || it.state === k) || "";
 
   const blocks = {
     text: (b) => DF.el("div", "st-text chk", b.text),
@@ -81,7 +86,10 @@ TEMPLATES.steps = async (spec, DF) => {
       const w = DF.el("div");
       if (b.label) w.appendChild(DF.el("div", "st-label chk", b.label));
       const items = (b.items || []).map(item);
-      const max = b.max || Math.max(1, ...items.map((i) => +i.value || 0), ...(b.line ? [b.line.value] : []));
+      // Reference lines: the level every bar is compared with (full, half full, the old value).
+      const lines = [...(b.line ? [b.line] : []), ...(b.lines || [])];
+      const unit = b.unit ? (/^[%°]/.test(b.unit) ? b.unit : " " + b.unit) : "";
+      const max = b.max || Math.max(1, ...items.map((i) => +i.value || 0), ...lines.map((l) => +l.value || 0));
       const area = DF.el("div", "st-bars");
       if (b.height) area.style.setProperty("--bh", b.height + "px");
       // Room above the tallest bar for its value label.
@@ -91,17 +99,17 @@ TEMPLATES.steps = async (spec, DF) => {
         const col = DF.el("div", "st-col");
         const bar = DF.el("div", `st-bar ${cls(it)}`);
         bar.style.height = `${pct}%`;
-        const v = DF.el("b", "chk", it.show != null ? String(it.show) : String(it.value));
+        const v = DF.el("b", "chk", it.show != null ? String(it.show) : (typeof it.value === "number" ? it.value.toLocaleString("en-US") : String(it.value)) + unit);
         v.style.bottom = `calc(${pct}% + 3px)`;
         col.append(bar, v);
         area.appendChild(col);
       }
-      if (b.line) {
-        const ln = DF.el("div", "st-line");
-        ln.style.bottom = `${(100 * b.line.value) / max}%`;
-        if (b.line.label) ln.appendChild(DF.el("i", null, b.line.label));
+      lines.forEach((l, i) => {
+        const ln = DF.el("div", "st-line" + (i && !l.hl ? " ref" : ""));
+        ln.style.bottom = `${(100 * l.value) / max}%`;
+        if (l.label) ln.appendChild(DF.el("i", null, l.label));
         area.appendChild(ln);
-      }
+      });
       w.appendChild(area);
       if (items.some((i) => i.label)) {
         const names = DF.el("div", "st-names");
@@ -142,6 +150,13 @@ TEMPLATES.steps = async (spec, DF) => {
   const steps = spec.steps || [];
   if (steps.length < 2) DF.warn("steps needs at least 2 steps; one state is a card or a flow");
   if (steps.length > 6) DF.warn(`${steps.length} steps; keep a worked example to 3 to 6 steps, or split it`);
+  // A panel of words only is a slide, not a figure: the reader has to picture the state themselves.
+  const wordy = steps.filter((s) => (s.state || s.blocks || []).every((b) => b.type === "text")).length;
+  if (steps.length >= 2 && wordy * 2 > steps.length)
+    DF.warn(`${wordy} of ${steps.length} steps show only text; show each state as chips, bars, a grid or kv, or draw it with freeform`);
+  if (spec.connect !== false) steps.forEach((s, i) => {
+    if (/^\s*(step\s*)?\d+\s*[.):]/i.test(s.title || "")) DF.warn(`step ${i + 1} title "${s.title}" repeats the step number the badge already shows`);
+  });
   const usable = DF.canvasWidth();
   const GAP = 34;
   let cols = spec.columns || (steps.length <= 3 ? steps.length : steps.length === 4 ? 2 : 3);
