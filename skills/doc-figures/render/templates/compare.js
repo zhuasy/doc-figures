@@ -113,7 +113,7 @@ TEMPLATES.compare = async (spec, DF) => {
     stage.appendChild(grid);
     const B = panel(spec.before || {}, "before"), A = panel(spec.after || {}, "after");
     const arrow = DF.el("div", "cmp-arrow");
-    arrow.innerHTML = ARROW;
+    if (spec.arrow !== false) arrow.innerHTML = ARROW;
     grid.append(B.el, arrow, A.el);
     const flows = [];
     for (const P of [B, A])

@@ -43,8 +43,8 @@ function makeDF(SPEC, THEME) {
     else if (CODE_NAME.test(t))
       warn(`box "${label}" is a code name; title it with what the part is ("Upload handler") and put the identifier in its description`);
   };
-  const lintCount = (n, what = "boxes") => {
-    if (n > MAX_BOXES) warn(`${n} ${what}; readers hold about 4 to 8 at once: split into an overview and a zoomed-in figure`);
+  const lintCount = (n, what = "boxes", max = MAX_BOXES) => {
+    if (n > max) warn(`${n} ${what}; readers hold about 4 to 8 at once: split into an overview and a zoomed-in figure`);
   };
   const warnCrossings = (n) => {
     if (n) warn(`${n} arrow crossing${n > 1 ? "s" : ""}; crossings hurt reading most: reorder nodes or edges, or split the figure`);
@@ -89,7 +89,8 @@ function makeDF(SPEC, THEME) {
 
   /** A node card: icon, bold label, one line of "what it does", optional tag. */
   function card(n, width) {
-    const kind = tagKind(n), text = tagText(n);
+    // `hl` is "look here" without a pill: the orange outline of `changed`, for explainers where nothing changed.
+    const kind = tagKind(n) || (n.hl ? "changed" : null), text = tagText(n);
     const c = el("div", ["node", "chk", n.external && "external", kind, n.faded && "faded"].filter(Boolean).join(" "));
     if (width) c.style.width = width + "px";
     if (n.icon) {
@@ -111,7 +112,7 @@ function makeDF(SPEC, THEME) {
   }
 
   function edgeLabel(e, num) {
-    const kind = e.changed ? "changed" : e.later ? "later" : "";
+    const kind = e.changed || e.hl ? "changed" : e.later ? "later" : "";
     const l = el("div", "elabel chk" + (num == null ? " nonum" : ""));
     if (num != null) l.appendChild(el("i", "num " + kind, String(num)));
     l.appendChild(el("span", null, e.label));
@@ -173,13 +174,13 @@ function makeDF(SPEC, THEME) {
     };
   }
 
-  const edgeKind = (e) => (e.changed ? "changed" : e.later ? "later" : "plain");
+  const edgeKind = (e) => (e.changed || e.hl ? "changed" : e.later ? "later" : "plain");
 
   /**
    * Lay out nodes (optionally grouped) and edges inside `container` with ELK.
    * direction: "auto" tries left-to-right first and falls back to top-down when wider than maxWidth.
    */
-  async function layoutFlow(container, {nodes, edges = [], direction = "auto", numbered = true, maxWidth, nodeWidth}) {
+  async function layoutFlow(container, {nodes, edges = [], direction = "auto", numbered = true, maxWidth, nodeWidth, maxBoxes, labelArrows = true}) {
     container.style.position = "relative";
     const leaves = {};
     const walk = (list) => list.forEach((n) => (n.children ? walk(n.children) : (leaves[n.id] = n)));
@@ -188,8 +189,8 @@ function makeDF(SPEC, THEME) {
     const usable = edges.filter((e) => leaves[e.from] && leaves[e.to]);
     const ids = Object.keys(leaves);
     ids.forEach((id) => lintBox(leaves[id].label));
-    usable.forEach((e) => lintArrow(e.label, e.from, e.to));
-    lintCount(ids.length);
+    usable.forEach((e) => { if (labelArrows || e.label) lintArrow(e.label, e.from, e.to); });
+    lintCount(ids.length, "boxes", maxBoxes);
     if (usable.length)
       for (const id of ids)
         if (!usable.some((e) => e.from === id || e.to === id)) warn(`box "${leaves[id].label || id}" has no arrows; connect it or drop it`);

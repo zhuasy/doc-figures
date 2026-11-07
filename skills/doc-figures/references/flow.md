@@ -26,6 +26,7 @@ big-picture figure every PR opens with: mark the part the change touches with `c
 | `id`, `label`, `does` | node | Key for edges, bold name, one short line on what the box does |
 | `icon`, `color` | node | Any file name in `render/icons/`; a palette name (below) |
 | `changed`, `tag` | node | Orange outline and CHANGED tag; `tag: "new"` (green) or `"removed"` (red, struck through); any other `tag` text is a plain pill, orange with `changed` (e.g. "new config") |
+| `hl` | node, edge | Orange "look here" outline with no CHANGED tag; use it in explainers, where nothing changed |
 | `external`, `faded` | node | Dashed amber border for another company's system; dim a box that is context only |
 | `children` | node | Makes a group: `{"id", "label", "children": [nodes]}` draws a labeled region around them |
 | `from`, `to`, `label` | edge | Arrow between node ids, short label; labels are numbered in list order |

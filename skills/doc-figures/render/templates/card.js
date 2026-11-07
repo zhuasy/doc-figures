@@ -12,6 +12,7 @@ TEMPLATES.card = async (spec, DF) => {
           padding: 8px 14px 9px 16px; border-top: 1px solid var(--grid); }
     .rec-h + .fr { border-top: 0; }
     .fn { font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+    .cards.plain .fn { font-family: inherit; font-size: 14px; font-weight: 600; }
     .fv { font-size: 14px; color: var(--body); overflow-wrap: anywhere; }
     .fr .tag { margin-left: 0; align-self: center; }
     .fnote { grid-column: 1 / -1; font-size: 13px; line-height: 1.35; color: var(--muted); margin-top: 3px; }
@@ -23,7 +24,7 @@ TEMPLATES.card = async (spec, DF) => {
 
   const cards = spec.cards || [];
   const links = spec.links || [];
-  const wrap = DF.el("div", "cards");
+  const wrap = DF.el("div", "cards" + (spec.fieldFont === "text" ? " plain" : ""));
   DF.stage().appendChild(wrap);
 
   const labels = links.map((l) => {
