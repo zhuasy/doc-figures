@@ -41,18 +41,35 @@ specs. Readers forget names; they keep a mechanism they watched run.
    pond), draw the real thing once, side or top view, with `freeform` and inline SVG. Bars and tables organize;
    only a picture shows what "in line" or "at right angles to the slope" looks like.
 3. **Run the mechanism on numbers.** Use `steps` (or `tree`, `loop`) with the source's own small example. Show
-   every step the conclusion depends on; a named step that is not shown is the commonest failure.
-4. **State the rule, then its limit.** After the example, say the general rule in words a reader could apply to a
-   case the figures do not show (`rule`). Add `limit` only for a real condition that breaks the mechanism ("no
-   frost, no lift, no creep"); leave it out rather than fill it with a scope note or a slower case.
-5. **Name the wrong idea.** If there is a common misconception, show it beside the truth (`myth`, or `compare`
+   every step the conclusion depends on; a named step that is not shown is the commonest failure. Show each
+   state, not only the result: the list with the removed item crossed out (`out`) before the next count, the amount
+   left after each step.
+4. **Never make the reader do arithmetic.** Write the result of every sum, ratio and unit change ("about 4,900
+   tons", not "7 times larger"; "500 ms", not "half a second" beside "3 ms"). Put compared amounts in the
+   same unit, side by side, on one axis. Draw the level each amount is judged against: both ends of a band, the
+   calm level, the 1× case (`lines` in `bars`).
+5. **Show the case where it does not happen.** Beside the example, show the control: the same push on flat
+   ground, the quiet hour when demand falls, the attempt that fails. A
+   mechanism is understood when the reader can say what changes the outcome.
+6. **Every effect shows its cause.** If a figure says B follows A, the link is on that figure ("damaged
+   cell → alarm signal → immune cells arrive"). Say why each condition is needed ("air would undo the
+   reaction, so it must be kept out"), and what a name means ("cold start: the engine has not warmed up").
+7. **State the rule, then its limit.** After the example, say the general rule in words a reader could apply to
+   a case the figures do not show (`rule`). Add `limit` only for a real condition that breaks the mechanism, as
+   strongly as the source says it and no more: "weaker when it is hot" is not "stops working when it is hot".
+8. **Name the wrong idea.** If there is a common misconception, show it beside the truth (`myth`, or `compare`
    with `"arrow": false`) and say what rules it out.
-6. **Plain words, one meaning each.** Define each term the first time it appears, in the figure itself. Never let
-   one label mean two things (copies A, B, C and tallies A, B, C). Write "almost never", not "never", for
-   statistical claims. Use `hl`, not `changed`: nothing is changing in an explainer.
-7. **Three to five figures.** Each answers one question: what happens, how, why, when not, what people get wrong.
-   Check every number against the source, including counts ("three trips", "two rounds"): a figure's panel count
-   is not the source's count, and a wrong number teaches a wrong idea.
+9. **Draw, don't list.** Words in boxes are a slide. A cycle that repeats is a path or a timeline drawn to scale,
+   not four cards; a part's shape or position is a `freeform` drawing. Keep text for the claim and the why.
+10. **Plain words, one meaning each.** Define each term the first time it appears, in the figure itself. Never
+   let one label mean two things (copies A, B, C and tallies A, B, C). Write "almost never", not "never", for
+   statistical claims. Use `hl`, not `changed`: nothing is changing in an explainer. Keep one color for one thing
+   in every figure (cost is always red).
+11. **Three to five figures, no repeats.** Each answers one question: what happens, how, why, when not, what
+   people get wrong. Say the rule once; do not restate it in every figure.
+12. **Check every number last.** Recompute each number in a title, caption or callout from the figure's own
+   values (40 kg over 0.5 kg is 80 times, not 40). Check counts against the source ("three trips", "two
+   rounds"): a figure's panel count is not the source's count, and a wrong number teaches a wrong idea.
 
 ## 2. Write the spec
 
