@@ -9,6 +9,7 @@ panel gets the orange "look here" outline.
 | `before`, `after` | Panel | | `{title?, caption?, accent?, blocks: [...]}` |
 | `layout` | `auto`, `side`, `stacked` | `auto` | `auto` stacks only when a flow block won't fit a side panel |
 | `chipKey` | object or `false` | auto | Words for chip states in the key, e.g. `{"skipped": "already there"}` |
+| `arrow` | `false` | | Drop the arrow between panels: two side-by-side cases (working vs broken, myth vs fact), not before and after |
 | `legend`, `note` | `false`, string | | As in `flow` |
 
 Panel `title` defaults to "Before" and "After". `accent: false` drops the orange outline from After.

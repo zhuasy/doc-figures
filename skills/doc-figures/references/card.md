@@ -46,3 +46,7 @@ Field names render in mono; values in the body font; a note sits under the row i
 - Links between cards stacked in the same column run in the outer margin. Keep their labels to a word or two, or the label leaves the canvas.
 - Wide label text widens the gap between cards for every card in the row; keep link labels short.
 - Values are plain text. Put types (`uuid`, `text`) or example values there, not prose; prose goes in `note`.
+
+
+`"fieldFont": "text"` shows field names in the body font instead of code font: use it for things that are not
+code, such as the parts of a cell or a contract.

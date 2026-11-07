@@ -1,0 +1,33 @@
+[
+{
+  "template": "loop",
+  "title": "Why a self-adjusting toll settles instead of running away",
+  "subtitle": "Illustrative: the toll moves 10 cents every 15 minutes.",
+  "nodes": [
+    {"id": "toll", "label": "Toll", "icon": "credit-card", "color": "violet", "does": "Up 10¢ if full, down 10¢ if half empty"},
+    {"id": "drivers", "label": "Drivers who cross", "icon": "users", "color": "blue", "does": "Some take the train when it costs more"},
+    {"id": "full", "label": "Time the bridge is full", "icon": "clock", "color": "teal", "does": "Measured every 15 minutes"}
+  ],
+  "links": [
+    {"from": "toll", "to": "drivers", "sign": "-", "label": "higher toll, fewer drivers"},
+    {"from": "drivers", "to": "full", "sign": "+", "label": "more drivers, fuller bridge"},
+    {"from": "full", "to": "toll", "sign": "+", "label": "fuller bridge, higher toll"}
+  ],
+  "inputs": [{"label": "New ferry", "does": "Takes some drivers", "to": "drivers", "sign": "-"}],
+  "takeaway": "Each push comes back as the opposite push, so the toll settles where drivers just fill the bridge."
+},
+{
+  "template": "loop",
+  "title": "Why a flash spreads through a pond",
+  "subtitle": "Illustrative.",
+  "nodes": [
+    {"id": "flash", "label": "Cells flashing together", "does": "One group"},
+    {"id": "chem", "label": "Lumerin released", "does": "More flashers, bigger burst"}
+  ],
+  "links": [
+    {"from": "flash", "to": "chem", "sign": "+", "label": "more flashers"},
+    {"from": "chem", "to": "flash", "sign": "+", "label": "pushes more cells over"}
+  ],
+  "takeaway": "The group grows until every cell is in it."
+}
+]

@@ -34,12 +34,17 @@ function makeDF(SPEC, THEME) {
     else if (VAGUE.has(String(label).trim().toLowerCase()))
       warn(`arrow ${from} → ${to} only says "${label}"; name the action ("submits the document")`);
   };
+  // One word that reads like source code: camelCase, snake_case, a file name, a call or a path.
+  const CODE_NAME = /^(?:[a-z]+[A-Z]\w*|\w+_\w+|[\w-]+\.(?:[jt]sx?|py|go|rs|rb|java|json|ya?ml|sql)|[\w.]+\(\)|\/?[\w-]+\/[\w\/.-]*)$/;
   const lintBox = (label) => {
-    if (label && GENERIC.has(String(label).trim().toLowerCase()))
+    const t = label == null ? "" : String(label).trim();
+    if (GENERIC.has(t.toLowerCase()))
       warn(`box "${label}" names a kind of part; use its real name ("Upload API", not "API")`);
+    else if (CODE_NAME.test(t))
+      warn(`box "${label}" is a code name; title it with what the part is ("Upload handler") and put the identifier in its description`);
   };
-  const lintCount = (n, what = "boxes") => {
-    if (n > MAX_BOXES) warn(`${n} ${what}; readers hold about 4 to 8 at once: split into an overview and a zoomed-in figure`);
+  const lintCount = (n, what = "boxes", max = MAX_BOXES) => {
+    if (n > max) warn(`${n} ${what}; readers hold about 4 to 8 at once: split into an overview and a zoomed-in figure`);
   };
   const warnCrossings = (n) => {
     if (n) warn(`${n} arrow crossing${n > 1 ? "s" : ""}; crossings hurt reading most: reorder nodes or edges, or split the figure`);
@@ -84,7 +89,8 @@ function makeDF(SPEC, THEME) {
 
   /** A node card: icon, bold label, one line of "what it does", optional tag. */
   function card(n, width) {
-    const kind = tagKind(n), text = tagText(n);
+    // `hl` is "look here" without a pill: the orange outline of `changed`, for explainers where nothing changed.
+    const kind = tagKind(n) || (n.hl ? "changed" : null), text = tagText(n);
     const c = el("div", ["node", "chk", n.external && "external", kind, n.faded && "faded"].filter(Boolean).join(" "));
     if (width) c.style.width = width + "px";
     if (n.icon) {
@@ -106,7 +112,7 @@ function makeDF(SPEC, THEME) {
   }
 
   function edgeLabel(e, num) {
-    const kind = e.changed ? "changed" : e.later ? "later" : "";
+    const kind = e.changed || e.hl ? "changed" : e.later ? "later" : "";
     const l = el("div", "elabel chk" + (num == null ? " nonum" : ""));
     if (num != null) l.appendChild(el("i", "num " + kind, String(num)));
     l.appendChild(el("span", null, e.label));
@@ -168,13 +174,13 @@ function makeDF(SPEC, THEME) {
     };
   }
 
-  const edgeKind = (e) => (e.changed ? "changed" : e.later ? "later" : "plain");
+  const edgeKind = (e) => (e.changed || e.hl ? "changed" : e.later ? "later" : "plain");
 
   /**
    * Lay out nodes (optionally grouped) and edges inside `container` with ELK.
    * direction: "auto" tries left-to-right first and falls back to top-down when wider than maxWidth.
    */
-  async function layoutFlow(container, {nodes, edges = [], direction = "auto", numbered = true, maxWidth, nodeWidth}) {
+  async function layoutFlow(container, {nodes, edges = [], direction = "auto", numbered = true, maxWidth, nodeWidth, maxBoxes, labelArrows = true}) {
     container.style.position = "relative";
     const leaves = {};
     const walk = (list) => list.forEach((n) => (n.children ? walk(n.children) : (leaves[n.id] = n)));
@@ -183,8 +189,8 @@ function makeDF(SPEC, THEME) {
     const usable = edges.filter((e) => leaves[e.from] && leaves[e.to]);
     const ids = Object.keys(leaves);
     ids.forEach((id) => lintBox(leaves[id].label));
-    usable.forEach((e) => lintArrow(e.label, e.from, e.to));
-    lintCount(ids.length);
+    usable.forEach((e) => { if (labelArrows || e.label) lintArrow(e.label, e.from, e.to); });
+    lintCount(ids.length, "boxes", maxBoxes);
     if (usable.length)
       for (const id of ids)
         if (!usable.some((e) => e.from === id || e.to === id)) warn(`box "${leaves[id].label || id}" has no arrows; connect it or drop it`);
@@ -333,6 +339,39 @@ function makeDF(SPEC, THEME) {
       if (size < 12.5 && !p.closest(".tag,.num")) { small = `${size}px text: "${walker.currentNode.textContent.trim().slice(0, 30)}"`; break; }
     }
     if (small) warn(`text below 12.5px reads too small in a doc: ${small}`);
+    const low = lowContrast();
+    if (low) warn(`text contrast ${low.ratio.toFixed(2)}:1 is under 4.5:1 (WCAG AA): "${low.text}"; use --body or --muted`);
+  }
+
+  /** First text under 4.5:1 contrast with its background, tints blended over the page. Slack to 4.3: house colored
+   *  text on its own tint (chips, badges) sits at 4.37 to 4.50. */
+  function lowContrast() {
+    const rgba = (c) => {
+      const m = (c.match(/[\d.]+/g) || []).map(Number), k = c.startsWith("color(") ? 255 : 1;
+      return [m[0] * k || 0, m[1] * k || 0, m[2] * k || 0, m[3] == null ? 1 : m[3]];
+    };
+    const lum = ([r, g, b]) => [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; })
+      .reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+    const over = (top, under) => top.slice(0, 3).map((v, i) => v * top[3] + under[i] * (1 - top[3]));
+    const page = rgba(getComputedStyle(document.body).backgroundColor);
+    const base = page[3] ? page.slice(0, 3) : (dark ? [0, 0, 0] : [255, 255, 255]);
+    const walker = document.createTreeWalker(document.getElementById("stage") || document.body, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const p = walker.currentNode.parentElement, text = walker.currentNode.textContent.trim();
+      if (!text || !p || p.closest("svg")) continue;
+      const layers = [];
+      for (let e = p; e && e !== document.documentElement; e = e.parentElement) {
+        const bg = rgba(getComputedStyle(e).backgroundColor);
+        if (bg[3] > 0) { layers.push(bg); if (bg[3] >= 1) break; }
+      }
+      let under = base;
+      for (const l of layers.reverse()) under = over(l, under);
+      const fg = over(rgba(getComputedStyle(p).color), under);
+      const [a, b] = [lum(fg), lum(under)].sort((x, y) => y - x);
+      const ratio = (a + 0.05) / (b + 0.05);
+      if (ratio < 4.3) return {ratio, text: text.slice(0, 30)};
+    }
+    return null;
   }
 
   async function run() {
@@ -372,7 +411,7 @@ function makeDF(SPEC, THEME) {
 
   const canvasWidth = () => document.getElementById("stage").clientWidth;
 
-  const api = {spec, dark, PALETTE, color, tint, css, warn, lintArrow, lintBox, lintCount, warnCrossings, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
+  const api = {spec, dark, PALETTE, color, tint, css, warn, lintArrow, lintBox, lintCount, warnCrossings, countCrossings, el, icon, card, tagEl, edgeLabel, path, wires, edgeKind,
                layoutFlow, legend, style, canvasWidth, run, stage: () => document.getElementById("stage")};
   return api;
 }

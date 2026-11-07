@@ -1,0 +1,13 @@
+{
+  "name": "freeform-two-callers",
+  "template": "freeform",
+  "title": "Two callers, one credential store",
+  "subtitle": "Illustrative. A hosted agent and a laptop agent reach the same vendor through the same proxy",
+  "html": "<div class='row' style='align-items:center;gap:170px'><div class='col grow'><div id='hosted' class='box'>{{icon:bot}}<b>Hosted agent</b><div class='muted'>signs each call with a service key</div></div><div id='laptop' class='box external'>{{icon:terminal}}<b>Laptop agent</b><div class='muted'>signs in once in the browser</div></div></div><div class='col grow'><div id='proxy' class='box changed'>{{icon:shield}}<b>Credential proxy</b><div class='muted'>looks up the vendor token, adds it</div></div></div><div class='col grow'><div id='vendor' class='box external'>{{icon:cloud}}<b>Vendor files API</b><div class='muted'>never sees the agent</div></div></div></div>",
+  "wires": [
+    {"from": "#hosted", "to": "#proxy", "label": "sends a tool call"},
+    {"from": "#laptop", "to": "#proxy", "label": "same URL"},
+    {"from": "#proxy", "to": "#vendor", "label": "+ vendor token", "changed": true}
+  ],
+  "legend": [{"box": "external", "text": "another company's system"}]
+}

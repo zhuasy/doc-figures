@@ -1,0 +1,26 @@
+[
+{
+  "template": "tree",
+  "title": "Why most positive tests are false alarms",
+  "subtitle": "Illustrative: 1% are sick; the test finds 90% of the sick and wrongly flags 9% of the healthy.",
+  "root": {"label": "people tested", "value": "1,000", "children": [
+    {"label": "sick", "value": 10, "edge": "1%", "children": [
+      {"id": "tp", "label": "test positive", "value": 9, "edge": "90%"},
+      {"label": "test negative", "value": 1, "edge": "10%"}]},
+    {"label": "healthy", "value": 990, "edge": "99%", "children": [
+      {"id": "fp", "label": "test positive", "value": 89, "edge": "9%"},
+      {"label": "test negative", "value": 901, "edge": "91%"}]}
+  ]},
+  "sum": {"label": "Everyone who tests positive:", "of": ["tp", "fp"], "result": "Only 9 of those 98 are sick: about 9%. The healthy group is so big that its few false alarms outnumber the real cases."}
+},
+{
+  "template": "tree",
+  "title": "Which store a request reads from",
+  "direction": "down",
+  "root": {"label": "Read request", "does": "Asks for one record", "children": [
+    {"label": "Edge cache", "does": "Served in about 5 ms", "edge": "seen in the last minute"},
+    {"label": "Regional replica", "does": "Served in about 40 ms", "edge": "older, not a write", "children": [
+      {"label": "Primary database", "does": "Fetches it fresh", "edge": "replica is behind"}]}
+  ]}
+}
+]
