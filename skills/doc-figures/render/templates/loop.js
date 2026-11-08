@@ -18,6 +18,7 @@ TEMPLATES.loop = async (spec, DF) => {
 .lp-badge.R { background: var(--hilite); }
 .lp-badge.B { background: var(--ok); }
 .lp-kind { margin-top: 5px; font-size: 12.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink); }
+.lp-plain { font-size: 13px; color: var(--muted); }
 .lp-take { margin-top: 14px; padding: 11px 14px; border-radius: 12px; border: 1.5px solid var(--ok-edge); font-size: 15px; color: var(--ink); line-height: 1.4; }
 .lp-take.R { border-color: var(--hilite-edge); }
 .lp-take b { color: var(--ok); }
@@ -39,6 +40,7 @@ TEMPLATES.loop = async (spec, DF) => {
   if (N < 2 || N > 6) DF.warn(`loop has ${N} quantities; a loop reads best with 2 to 6`);
   nodes.forEach((n) => DF.lintBox(n.label));
   const sign = (l) => (/^(-|−|minus|less)$/i.test(String(l.sign ?? "+")) ? -1 : 1);
+  links.forEach((l) => { if (!l.label) DF.warn(`link ${l.from} -> ${l.to} has no label; say what happens in plain words ("warmer water holds less gas"), since few readers decode + and − alone`); });
   links.forEach((l) => { if (l.sign == null) DF.warn(`link ${l.from} -> ${l.to} has no sign; say "+" (more makes more) or "-" (more makes less)`); });
 
   // Each quantity must feed the next one round the ring, in node order, or it is not one loop.
@@ -151,6 +153,7 @@ TEMPLATES.loop = async (spec, DF) => {
   const mid = DF.el("div", "lp-mid chk");
   mid.appendChild(DF.el("div", `lp-badge ${kind}`, kind));
   mid.appendChild(DF.el("div", "lp-kind", kind === "B" ? "Balancing" : "Reinforcing"));
+  mid.appendChild(DF.el("div", "lp-plain", kind === "B" ? "it settles" : "it snowballs"));
   Object.assign(mid.style, {left: cx + "px", top: cy + "px"});
   wrap.appendChild(mid);
 

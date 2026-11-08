@@ -37,6 +37,7 @@ the behaviour from the signs.
 ## Tips
 
 - Name each node as a quantity that can go up or down ("Drivers who cross", not "Drivers").
-- Write each link label as "more X, more Y" or "higher X, fewer Y": it teaches the sign.
+- Give every link a label, as "more X, more Y" or "higher X, fewer Y". Most readers cannot decode + and − alone;
+  the template warns on a link without a label.
 - An `input` answers "what if" questions: show the outside change the reader is likely to ask about.
 - Pair it with a `steps` figure that runs the loop once on numbers.
