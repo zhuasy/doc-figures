@@ -130,6 +130,8 @@ Three flags write other formats next to, or instead of, the PNGs (details in `re
     you changed.
   - **Thorough:** when the user asks for careful, thorough, final or publish-ready figures, or says "slow mode".
     Review in passes until a pass finds nothing, usually two or three.
+  - **Reasoning effort** matters more than the number of passes. If you or the caller can choose it, use high
+    effort for explainers and max for figures that will be published.
 
   In each pass, open every light PNG and check, against the source and not from memory:
   1. **Picture.** Does each drawing match the plan, with the eye path in the order of the cause? Cover the words:
