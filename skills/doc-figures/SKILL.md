@@ -125,8 +125,13 @@ Three flags write other formats next to, or instead of, the PNGs (details in `re
 - **PR, system or doc figure:** look once at the contact sheets, or the single PNG (Read in Claude Code,
   `view_image` in Codex). Is the takeaway obvious in five seconds? Is every fact right? Don't open each PNG
   separately.
-- **Explainer:** review in passes until a pass finds nothing, usually two or three. In each pass, open every
-  light PNG and check, against the source and not from memory:
+- **Explainer:** pick the mode from the request.
+  - **Fast (default):** one review pass. Fix what it finds, re-render, and look once more only at the figures
+    you changed.
+  - **Thorough:** when the user asks for careful, thorough, final or publish-ready figures, or says "slow mode".
+    Review in passes until a pass finds nothing, usually two or three.
+
+  In each pass, open every light PNG and check, against the source and not from memory:
   1. **Picture.** Does each drawing match the plan, with the eye path in the order of the cause? Cover the words:
      do the shapes still show the mechanism?
   2. **Numbers.** Recompute every number, sum, ratio and unit from the source.
@@ -134,7 +139,8 @@ Three flags write other formats next to, or instead of, the PNGs (details in `re
      "because" and each arrow a link the source states?
   4. **Drawings against words.** Does every arrow, shift and position point the way its caption says? Is a red
      cross or `myth` only on a false statement?
-  Fix what you find in the spec, re-render, and start the next pass.
+  Fix what you find in the spec and re-render. In thorough mode, start the next pass. Fast mode keeps all four
+  checks and drops only the repeat passes: numbers and drawings against words catch most errors.
 
 ## 5. Deliver
 
