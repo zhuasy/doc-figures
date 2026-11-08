@@ -34,8 +34,13 @@ A chart of measured data series (bars, lines, distributions) is not a template: 
 ## Explaining an idea
 
 When the figures teach a concept to someone new to the field (not a PR or a system), plan the set before the
-specs. Readers forget names; they keep a mechanism they watched run.
+specs. Readers forget names; they keep a mechanism they watched run. A reader believes every line of a figure, so
+one wrong number or arrow costs more than a missing detail: say less, and make all of it true.
 
+0. **Read the source like a checker.** Before you plan, list the source's claims, numbers, cases and stages, each
+   with its qualifiers ("in most years", "about", "among metals"). Every statement in a figure must trace to that
+   list or be arithmetic on it. Never add a cause, a number or a general rule the source does not give; if the
+   source says "a small rise", draw it small and leave it unnumbered.
 1. **Claim first.** The first figure states the idea in one plain sentence and shows its result.
 2. **Ground it in a picture.** If the idea happens in space (moons round a planet, a stone on a slope, cells in a
    pond), draw the real thing once, side or top view, with `freeform` and inline SVG. Bars and tables organize;
@@ -61,6 +66,8 @@ specs. Readers forget names; they keep a mechanism they watched run.
    with `"arrow": false`) and say what rules it out.
 9. **Draw, don't list.** Words in boxes are a slide. A cycle that repeats is a path or a timeline drawn to scale,
    not four cards; a part's shape or position is a `freeform` drawing. Keep text for the claim and the why.
+   Cover the words: the shapes, positions and arrows alone should still show what moves, where and which way. If
+   they do not, the figure is a list with lines.
 10. **Plain words, one meaning each.** Define each term the first time it appears, in the figure itself. Never
    let one label mean two things (copies A, B, C and tallies A, B, C). Write "almost never", not "never", for
    statistical claims. Use `hl`, not `changed`: nothing is changing in an explainer. Keep one color for one thing
@@ -68,14 +75,16 @@ specs. Readers forget names; they keep a mechanism they watched run.
 11. **Three to five figures, no repeats.** Each answers one question: what happens, how, why, when not, what
    people get wrong. Say the rule once; do not restate it in every figure.
 12. **Check every number last.** Recompute each number in a title, caption or callout from the figure's own
-   values (40 kg over 0.5 kg is 80 times, not 40). Check counts against the source ("three trips", "two
-   rounds"): a figure's panel count is not the source's count, and a wrong number teaches a wrong idea.
+   values (40 kg over 0.5 kg is 80 times, not 40). Check units and powers of ten. Check counts against the source
+   ("three trips", "two rounds"): a figure's panel count is not the source's count, and a wrong number teaches a
+   wrong idea. Section 4 gives the full review.
 
 ## 2. Write the spec
 
 - **Real parts, example data.** Every box and arrow is a part that exists in the system or the change; never add
-  one to fill out the picture. Example values (names, numbers, ids) may be invented: say "Illustrative" in the
-  subtitle. Dig up real data only when the figure claims a measurement. Numbers must add up.
+  one to fill out the picture. In a system figure, example values (names, numbers, ids) may be invented: say
+  "Illustrative" in the subtitle. In an explainer, use only the source's numbers and arithmetic on them. Dig up
+  real data only when the figure claims a measurement. Numbers must add up.
 - **One subject, four to eight boxes.** Show runtime or deploy, structure or order, not all of them. Calls that go
   back and forth are a `sequence`, not a row of boxes.
 - **Real names, specific verbs.** Each box has its real name ("Upload API", not "API") and says what it does.
@@ -107,14 +116,25 @@ Three flags write other formats next to, or instead of, the PNGs (details in `re
 - `--t3` writes only `<name>.t3.html`, laid out for T3 Code's 728 px `html_render` frame. Use it to show a figure
   inside a T3 thread: pass the file's HTML to `html_preview`, then to `html_render`. It still prints every `WARN`.
 
-## 4. Check once
+## 4. Check
 
 - Fix every `WARN` line in the spec: shorten a label, drop a box, or split the figure. Re-render. Arrow crossings
   hurt reading more than anything else; reorder nodes or edges in the spec to remove them. The checks also flag
   vague or missing arrow labels, generic or code-style box names, lone boxes, more than 8 boxes, and text under
   4.5:1 contrast.
-- Then look once at the contact sheets, or the single PNG (Read in Claude Code, `view_image` in Codex). Is the
-  takeaway obvious in five seconds? Is every fact right? Don't open each PNG separately.
+- **PR, system or doc figure:** look once at the contact sheets, or the single PNG (Read in Claude Code,
+  `view_image` in Codex). Is the takeaway obvious in five seconds? Is every fact right? Don't open each PNG
+  separately.
+- **Explainer:** review in passes until a pass finds nothing, usually two or three. In each pass, open every
+  light PNG and check, against the source and not from memory:
+  1. **Picture.** Does each drawing match the plan, with the eye path in the order of the cause? Cover the words:
+     do the shapes still show the mechanism?
+  2. **Numbers.** Recompute every number, sum, ratio and unit from the source.
+  3. **Sentences.** Is each title, caption and rule as narrow as the source, with its qualifiers kept? Is each
+     "because" and each arrow a link the source states?
+  4. **Drawings against words.** Does every arrow, shift and position point the way its caption says? Is a red
+     cross or `myth` only on a false statement?
+  Fix what you find in the spec, re-render, and start the next pass.
 
 ## 5. Deliver
 
