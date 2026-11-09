@@ -141,7 +141,9 @@ Three flags write other formats next to, or instead of, the PNGs (details in `re
      "because" and each arrow a link the source states?
   4. **Drawings against words.** Does every arrow, shift and position point the way its caption says? Is a red
      cross or `myth` only on a false statement?
-  Fix what you find in the spec and re-render. In thorough mode, start the next pass. Fast mode keeps all four
+  5. **Coverage.** Is every step the conclusion depends on still shown? Fix a wrong line by correcting it, not
+     by deleting it: a figure that says less is not more accurate if the reader can no longer follow the cause.
+  Fix what you find in the spec and re-render. In thorough mode, start the next pass. Fast mode keeps all five
   checks and drops only the repeat passes: numbers and drawings against words catch most errors.
 
 ## 5. Deliver
