@@ -124,6 +124,12 @@ def canvas(fig, rect=(0, 0, 1, 1)):
 
 
 def save(fig, path):
+    for ax in fig.axes:
+        if (ax.get_xscale(), ax.get_yscale()) != ("linear", "linear"):
+            raise ValueError(
+                "doc-figures charts use linear axes only: a log axis hides how big a gap is. "
+                "Zoom into the crowded range in a second panel, or put the outlier in a note."
+            )
     fig.savefig(path, facecolor=BG)
     plt.close(fig)
     print(f"wrote {path}", file=sys.stderr)
@@ -496,3 +502,93 @@ def message(ax, lanes, src, dst, y, text):
         bbox=dict(boxstyle="round,pad=0.15", fc=BG, ec="none"),
         zorder=3,
     )
+
+
+def chart_axes(ax, xlabel="", ylabel="", xfmt=None, yfmt=None):
+    """The house look for a line or scatter chart: light grid, no top or right border, linear axes.
+    xfmt and yfmt are format strings for tick labels, such as "${:g}" or "{:g} ms"."""
+    ax.grid(True, color=GRID)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.tick_params(length=0, labelsize=10)
+    ax.set_xlabel(xlabel, fontsize=10.5, labelpad=8)
+    ax.set_ylabel(ylabel, fontsize=10.5, labelpad=8)
+    for axis, fmt in ((ax.xaxis, xfmt), (ax.yaxis, yfmt)):
+        if fmt:
+            axis.set_major_formatter(lambda v, _, fmt=fmt: fmt.format(v))
+
+
+def frontier(points, better=("low", "high")):
+    """The points no other point beats on both axes, in x order. better says which end of x and of y wins."""
+    sx = 1 if better[0] == "low" else -1
+    sy = 1 if better[1] == "high" else -1
+    best, out = None, []
+    for p in sorted(points, key=lambda p: (sx * p["x"], -sy * p["y"])):
+        if best is None or sy * p["y"] > best:
+            best = sy * p["y"]
+            out.append(p)
+    return sorted(out, key=lambda p: p["x"])
+
+
+def scatter(ax, points, xlabel="", ylabel="", xfmt=None, yfmt=None, better=("low", "high"),
+            line=True, best=None, best_label="Most attractive"):
+    """Labelled dots for a trade-off between two measures, such as cost against quality.
+
+    points: dicts with label, x, y and color (one color per group; name the groups with legend()).
+    line=True joins the frontier with a dotted line: the points no other point beats on both axes.
+    best=(x, y) shades the corner that is better than x and better than y.
+    Each label goes in the first free place around its dot; a label with no free place prints a warning.
+    """
+    from matplotlib.transforms import Bbox
+
+    chart_axes(ax, xlabel, ylabel, xfmt, yfmt)
+    ax.scatter([p["x"] for p in points], [p["y"] for p in points], s=90,
+               c=[p.get("color", BLUE) for p in points], edgecolors=BG, linewidths=1.2, zorder=3)
+    ax.margins(0.1)
+    for key, set_lim, lim in (("x", ax.set_xlim, ax.get_xlim()), ("y", ax.set_ylim, ax.get_ylim())):
+        low = 0 if min(p[key] for p in points) >= 0 else lim[0]
+        set_lim(max(lim[0], low), lim[1])
+    edge = frontier(points, better) if line else []
+    ax.plot([p["x"] for p in edge], [p["y"] for p in edge],
+            color=BODY, lw=1.6, linestyle=(0, (1, 2.5)), zorder=2)
+    fig = ax.figure
+    taken = []
+    if best:
+        x_edge = ax.get_xlim()[0 if better[0] == "low" else 1]
+        y_edge = ax.get_ylim()[1 if better[1] == "high" else 0]
+        ax.add_patch(Rectangle((min(best[0], x_edge), min(best[1], y_edge)), abs(best[0] - x_edge),
+                               abs(best[1] - y_edge), facecolor=OK_FILL, edgecolor="none", zorder=0))
+        left, top = better[0] == "low", better[1] == "high"
+        note = ax.annotate(best_label, (x_edge, y_edge), xytext=(8 if left else -8, -8 if top else 8),
+                           textcoords="offset points", ha="left" if left else "right",
+                           va="top" if top else "bottom", fontsize=10, fontweight="bold", color=OK)
+        fig.canvas.draw()
+        taken.append(note.get_window_extent())
+    fig.canvas.draw()
+    frame = ax.get_window_extent()
+    dots = ax.transData.transform([(p["x"], p["y"]) for p in points])
+    r = 5.5 * fig.dpi / 72
+    taken += [Bbox.from_extents(x - r, y - r, x + r, y + r) for x, y in dots]
+    path = ax.transData.transform([(p["x"], p["y"]) for p in edge])
+    for (x0, y0), (x1, y1) in zip(path, path[1:]):
+        n = int(max(abs(x1 - x0), abs(y1 - y0)) // 6) + 1
+        taken += [Bbox.from_extents(x - 3, y - 3, x + 3, y + 3)
+                  for x, y in ((x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n) for i in range(n + 1))]
+    places = [(9, 0, "left", "center"), (-9, 0, "right", "center"), (0, 9, "center", "bottom"),
+              (0, -9, "center", "top"), (8, 8, "left", "bottom"), (8, -8, "left", "top"),
+              (-8, 8, "right", "bottom"), (-8, -8, "right", "top")]
+    for p in points:
+        for i, (dx, dy, ha, va) in enumerate(places + places[:1]):
+            text = ax.annotate(p["label"], (p["x"], p["y"]), xytext=(dx, dy), textcoords="offset points",
+                               ha=ha, va=va, fontsize=10, color=BODY, zorder=4)
+            box = text.get_window_extent()
+            inside = frame.x0 <= box.x0 and box.x1 <= frame.x1 and frame.y0 <= box.y0 and box.y1 <= frame.y1
+            if inside and not any(box.overlaps(o) for o in taken):
+                break
+            if i == len(places):
+                print(f"WARN no free place for label {p['label']!r}: shorten it or grow the figure",
+                      file=sys.stderr)
+                break
+            text.remove()
+        taken.append(box)

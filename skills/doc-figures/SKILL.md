@@ -29,7 +29,8 @@ Write the takeaway in one sentence, then pick the template. Read only that templ
 If none fits, use `freeform` (`references/freeform.md`): you write the layout as HTML with the house classes, and
 the renderer still themes and checks it.
 
-A chart of measured data series (bars, lines, distributions) is not a template: see `references/charts.md`.
+A chart of measured data (bars, lines, distributions, a scatter of two measures with its frontier line) is not a
+template: see `references/charts.md`. Chart axes are linear; a log scale is not permitted.
 
 ## Explaining an idea
 
